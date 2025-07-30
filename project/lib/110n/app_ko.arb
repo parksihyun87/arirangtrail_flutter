@@ -1,0 +1,16 @@
+{
+  "@@locale": "ko",
+  "login": "로그인",
+  "logout": "로그아웃",
+  "join": "회원가입",
+  "calendar": "캘린더",
+  "home": "홈",
+  "language": "언어 변경",
+  "logoutSuccessMessage": "성공적으로 로그아웃되었습니다.",
+  "welcomeMessage": "{nickname}님, 환영합니다!",
+  "@welcomeMessage": {
+    "placeholders": {
+      "nickname": { "type": "String" }
+    }
+  }
+}
