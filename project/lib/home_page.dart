@@ -58,8 +58,6 @@ class _HomePageState extends State<HomePage> {
     final uri = Uri.parse(apiUrl);
     try {
       final response = await http.get(uri);
-      print('HomePage API Response Status: ${response.statusCode}');
-      print('HomePage API Response Body: ${response.body}');
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         final dynamic rawItems = data['response']?['body']?['items']?['item'];
@@ -69,7 +67,6 @@ class _HomePageState extends State<HomePage> {
         } else if (rawItems is Map) {
           items = [rawItems];
         }
-        print('HomePage Parsed Items: $items');
         final List<String> imageUrls = items
             .map<String?>((item) => item['firstimage'] as String?)
             .where((url) => url != null && url.isNotEmpty)
@@ -88,7 +85,6 @@ class _HomePageState extends State<HomePage> {
         throw Exception('서버 응답 오류: ${response.statusCode}');
       }
     } catch (e) {
-      print('HomePage Error: $e');
       setState(() {
         _error = '데이터를 불러오는 데 실패했습니다: $e';
         _isLoading = false;

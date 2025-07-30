@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:project/screen_page.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'home_page.dart';
 import 'auth_provider.dart';
-import 'navigation_drawer.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -11,7 +10,7 @@ Future<void> main() async {
 
   runApp(
     ChangeNotifierProvider(
-      create: (_) => AuthProvider(),
+      create: (_) => AuthProvider()..loadUserData(),
       child: const MyApp(),
     ),
   );
@@ -26,28 +25,16 @@ class MyApp extends StatelessWidget {
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Arirang Trail',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: primaryColor),
         appBarTheme: const AppBarTheme(
           backgroundColor: primaryColor,
           foregroundColor: Colors.white,
+          toolbarHeight: 80,
         ),
         useMaterial3: true,
       ),
-      home: Scaffold(
-        appBar: AppBar(
-          title: Image.asset(
-            'assets/arirang1.png',
-            height: 70,
-            color: Colors.white,
-            colorBlendMode: BlendMode.srcIn,
-          ),
-          centerTitle: true,
-        ),
-        drawer: const CustomDrawer(),
-        body: const HomePage(),
-      ),
+      home: const SplashScreen(),
     );
   }
 }
