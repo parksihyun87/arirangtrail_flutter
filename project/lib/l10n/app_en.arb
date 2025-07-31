@@ -1,0 +1,54 @@
+{
+  "@@locale": "en",
+  "login": "Login",
+  "logout": "Logout",
+  "join": "Sign Up",
+  "calendar": "Calendar",
+  "home": "Home",
+  "language": "Language",
+  "myChatHistory": "My Chat History",
+  "myPage": "My Page",
+  "logoutSuccessMessage": "Successfully logged out.",
+  "welcomeMessage": "Welcome, {nickname}!",
+  "@welcomeMessage": {
+    "placeholders": {
+      "nickname": {
+        "type": "String"
+      }
+    }
+  },
+  "username": "Username",
+  "password": "Password",
+  "email": "Email",
+  "firstName": "First Name",
+  "lastName": "Last Name",
+  "nickname": "Nickname",
+  "birthdate": "Birthdate",
+  "loginSuccess": "Login Success",
+  "joinSuccess": "Sign Up Success",
+  "loginFailed": "Login Failed",
+  "joinFailed": "Sign Up Failed",
+  "confirm": "Confirm",
+  "loading": "Loading...",
+  "joinComplete": "Sign Up Complete",
+  "alreadyHaveAccount": "Already have an account? Login",
+  "createNewAccount": "Create a new account (Sign Up)",
+  "inputError": "Input Error",
+  "errorEnterAllFields": "Please enter both username and password.",
+  "errorSelectItem": "Please enter your {itemName}.",
+  "@errorSelectItem": {
+    "placeholders": {
+      "itemName": {
+        "type": "String"
+      }
+    }
+  },
+  "loginTitle": "Enjoy today's festival!",
+  "homeTitle": "Today's Festivals",
+  "homeSubtitle": "Festival information from all over the country at a glance!",
+  "noImages": "No images to display.",
+  "calendarView": "views",
+  "calendarName": "name",
+  "calendarEnding": "ending",
+  "calendarComment": "There are no festivals scheduled for that date."
+}

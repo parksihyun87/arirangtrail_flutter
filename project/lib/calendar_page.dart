@@ -2,9 +2,13 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'package:project/provider/locale_provider.dart';
+import 'package:project/widget/translator.dart';
+import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'festival_model.dart';
+import 'l10n/app_localizations.dart';
 
 class CalendarPage extends StatefulWidget {
   const CalendarPage({super.key});
@@ -22,19 +26,6 @@ class _CalendarPageState extends State<CalendarPage> {
   String _sortOrder = 'views';
   Map<DateTime, List<Festival>> _events = {};
 
-  DateTime? _parseDateSafely(String dateStr) {
-    final cleanDateStr = dateStr.trim();
-    if (cleanDateStr.length != 8) return null;
-    try {
-      final year = int.parse(cleanDateStr.substring(0, 4));
-      final month = int.parse(cleanDateStr.substring(4, 6));
-      final day = int.parse(cleanDateStr.substring(6, 8));
-      return DateTime.utc(year, month, day);
-    } catch (e) {
-      return null;
-    }
-  }
-
   @override
   void initState() {
     super.initState();
@@ -45,59 +36,42 @@ class _CalendarPageState extends State<CalendarPage> {
   Future<void> _fetchFestivalsForMonth(DateTime month) async {
     final monthKey = DateFormat('yyyyMM').format(month);
     if (_loadedMonths.contains(monthKey)) return;
-
     setState(() {
       _isMonthLoading = true;
     });
-
     final now = DateTime.now();
     final today = DateTime.utc(now.year, now.month, now.day);
-
     const SERVICE_KEY =
         "WCIc8hzzBS3Jdod%2BVa357JmB%2FOS0n4D2qPHaP9PkN4bXIfcryZyg4iaZeTj1fEYJ%2B8q2Ol8FIGe3RkW3d72FHA%3D%3D";
     final eventStartDate =
         '${month.year}${month.month.toString().padLeft(2, '0')}01';
-
     final uri = Uri.parse(
-      'https://apis.data.go.kr/B551011/KorService2/searchFestival2?serviceKey=$SERVICE_KEY&MobileApp=AppTest&MobileOS=ETC&_type=json&numOfRows=200&pageNo=1&arrange=B&eventStartDate=$eventStartDate',
-    );
-
+        'https://apis.data.go.kr/B551011/KorService2/searchFestival2?serviceKey=$SERVICE_KEY&MobileApp=AppTest&MobileOS=ETC&_type=json&numOfRows=200&pageNo=1&arrange=B&eventStartDate=$eventStartDate');
     try {
       final response = await http.get(uri);
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         final dynamic rawItems = data['response']?['body']?['items']?['item'];
         List<dynamic> items = [];
-
         if (rawItems is List) {
           items = rawItems;
         } else if (rawItems is Map) {
           items = [rawItems];
         }
-
         if (items.isNotEmpty) {
           final festivals =
               items.map((item) => Festival.fromJson(item)).toList();
           final newEvents = Map<DateTime, List<Festival>>.from(_events);
-
           for (final festival in festivals) {
             if (festival.eventstartdate.isEmpty ||
                 festival.eventenddate.isEmpty) continue;
-
             final startDate = _parseDateSafely(festival.eventstartdate);
             final endDate = _parseDateSafely(festival.eventenddate);
-
-            if (startDate == null || endDate == null) {
-              continue;
-            }
-
+            if (startDate == null || endDate == null) continue;
             for (var day = startDate;
                 day.isBefore(endDate.add(const Duration(days: 1)));
                 day = day.add(const Duration(days: 1))) {
-              if (day.isBefore(today)) {
-                continue;
-              }
-
+              if (day.isBefore(today)) continue;
               final dayWithoutTime = DateTime.utc(day.year, day.month, day.day);
               if (newEvents[dayWithoutTime] == null)
                 newEvents[dayWithoutTime] = [];
@@ -127,7 +101,6 @@ class _CalendarPageState extends State<CalendarPage> {
   List<Festival> _getEventsForDay(DateTime day) {
     final dayWithoutTime = DateTime.utc(day.year, day.month, day.day);
     List<Festival> events = List.from(_events[dayWithoutTime] ?? []);
-
     switch (_sortOrder) {
       case 'name':
         events.sort((a, b) => a.title.compareTo(b.title));
@@ -139,14 +112,30 @@ class _CalendarPageState extends State<CalendarPage> {
     return events;
   }
 
+  DateTime? _parseDateSafely(String dateStr) {
+    final cleanDateStr = dateStr.trim();
+    if (cleanDateStr.length != 8) return null;
+    try {
+      final year = int.parse(cleanDateStr.substring(0, 4));
+      final month = int.parse(cleanDateStr.substring(4, 6));
+      final day = int.parse(cleanDateStr.substring(6, 8));
+      return DateTime.utc(year, month, day);
+    } catch (e) {
+      return null;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final locale = context.watch<LocaleProvider>().locale;
+
     return Scaffold(
-      appBar: AppBar(title: const Text('월별 축제 달력')),
+      appBar: AppBar(title: Text(l10n.calendar)),
       body: Column(
         children: [
           TableCalendar(
-            locale: 'ko_KR',
+            locale: locale.toString(),
             firstDay: DateTime.utc(2020, 1, 1),
             lastDay: DateTime.utc(2030, 12, 31),
             focusedDay: _focusedDay,
@@ -196,17 +185,13 @@ class _CalendarPageState extends State<CalendarPage> {
           else if (_error != null)
             Expanded(child: Center(child: Text(_error!)))
           else
-            Expanded(child: _buildFestivalList()),
+            Expanded(child: _buildFestivalList(l10n)),
         ],
       ),
     );
   }
 
-  Widget _buildFestivalList() {
-    if (_selectedDay == null) {
-      return const Center(child: Text('달력에서 날짜를 선택해주세요.'));
-    }
-
+  Widget _buildFestivalList(AppLocalizations l10n) {
     final selectedDayEvents = _getEventsForDay(_selectedDay!);
 
     return Padding(
@@ -219,7 +204,7 @@ class _CalendarPageState extends State<CalendarPage> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  DateFormat('yyyy년 MM월 dd일').format(_selectedDay!),
+                  DateFormat.yMMMMd(l10n.localeName).format(_selectedDay!),
                   style: const TextStyle(
                       fontWeight: FontWeight.bold, fontSize: 16),
                 ),
@@ -237,13 +222,17 @@ class _CalendarPageState extends State<CalendarPage> {
                   constraints:
                       const BoxConstraints(minHeight: 32.0, minWidth: 60.0),
                   borderRadius: BorderRadius.circular(8),
-                  children: const [Text('조회순'), Text('이름순'), Text('마감순')],
+                  children: [
+                    Text(l10n.calendarView),
+                    Text(l10n.calendarName),
+                    Text(l10n.calendarEnding)
+                  ],
                 ),
               ],
             ),
           ),
           if (selectedDayEvents.isEmpty)
-            const Expanded(child: Center(child: Text('해당 날짜에 예정된 축제가 없습니다.')))
+            Expanded(child: Center(child: Text(l10n.calendarComment)))
           else
             Expanded(
               child: ListView.builder(
@@ -270,14 +259,16 @@ class _CalendarPageState extends State<CalendarPage> {
                               width: 80,
                               height: 80,
                               color: Colors.grey[200],
-                              child: const Icon(Icons.image_not_supported),
-                            ),
-                      title: Text(festival.title,
-                          style: const TextStyle(fontWeight: FontWeight.bold)),
-                      subtitle: Text(festival.addr1,
-                          maxLines: 2, overflow: TextOverflow.ellipsis),
+                              child: const Icon(Icons.image_not_supported)),
+                      title: TranslatedText(
+                        text: festival.title,
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      subtitle: TranslatedText(
+                        text: festival.addr1,
+                      ),
                       onTap: () {
-                        // TODO: 상세 페이지로 이동
+                        /* TODO: 상세 페이지로 이동 */
                       },
                     ),
                   );

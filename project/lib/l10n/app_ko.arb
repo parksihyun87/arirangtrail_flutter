@@ -1,0 +1,54 @@
+{
+  "@@locale": "ko",
+  "login": "로그인",
+  "logout": "로그아웃",
+  "join": "회원가입",
+  "calendar": "캘린더",
+  "home": "홈",
+  "language": "언어 변경",
+  "myChatHistory": "나의 채팅기록",
+  "myPage": "마이페이지",
+  "logoutSuccessMessage": "성공적으로 로그아웃되었습니다.",
+  "welcomeMessage": "{nickname}님, 환영합니다!",
+  "@welcomeMessage": {
+    "placeholders": {
+      "nickname": {
+        "type": "String"
+      }
+    }
+  },
+  "username": "아이디",
+  "password": "비밀번호",
+  "email": "이메일",
+  "firstName": "성 (First Name)",
+  "lastName": "이름 (Last Name)",
+  "nickname": "닉네임",
+  "birthdate": "생년월일 (Birthdate)",
+  "loginSuccess": "로그인 성공",
+  "joinSuccess": "회원가입 성공",
+  "loginFailed": "로그인 실패",
+  "joinFailed": "회원가입 실패",
+  "confirm": "확인",
+  "loading": "로딩 중...",
+  "joinComplete": "회원가입 완료",
+  "alreadyHaveAccount": "이미 계정이 있으신가요? 로그인",
+  "createNewAccount": "새 계정 만들기 (회원가입)",
+  "inputError": "입력 오류",
+  "errorEnterAllFields": "아이디와 비밀번호를 모두 입력해주세요.",
+  "errorSelectItem": "{itemName} 항목을 입력해주세요.",
+  "@errorSelectItem": {
+    "placeholders": {
+      "itemName": {
+        "type": "String"
+      }
+    }
+  },
+  "loginTitle": "오늘의 축제를 즐겨보세요!",
+  "homeTitle": "오늘의 축제",
+  "homeSubtitle": "전국의 축제 정보를 한눈에!",
+  "noImages": "표시할 이미지가 없습니다.",
+  "calendarView": "조회순",
+  "calendarName": "이름순",
+  "calendarEnding": "마감순",
+  "calendarComment": "해당 날짜에 예정된 축제가 없습니다."
+}

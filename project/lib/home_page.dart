@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:project/l10n/app_localizations.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -94,10 +95,11 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     if (_isLoading) return const Center(child: CircularProgressIndicator());
     if (_error != null) return Center(child: Text(_error!));
-    if (_fetchedImages.isEmpty)
-      return const Center(child: Text('표시할 이미지가 없습니다.'));
+    if (_fetchedImages.isEmpty) return Center(child: Text(l10n.noImages));
     return Stack(
       fit: StackFit.expand,
       children: [
@@ -116,23 +118,31 @@ class _HomePageState extends State<HomePage> {
           },
         ),
         Container(color: Colors.black.withOpacity(0.4)),
-        const Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                '오늘의 축제',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 42,
-                  fontWeight: FontWeight.bold,
+        Center(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(
+                  l10n.homeTitle,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 42,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-              Text(
-                '전국의 축제 정보를 한눈에!',
-                style: TextStyle(color: Colors.white, fontSize: 18),
-              ),
-            ],
+                SizedBox(height: 30),
+                Text(
+                  l10n.homeSubtitle,
+                  textAlign: TextAlign.center,
+                  style:
+                      TextStyle(color: Colors.white, fontSize: 18, height: 1.5),
+                ),
+              ],
+            ),
           ),
         ),
       ],

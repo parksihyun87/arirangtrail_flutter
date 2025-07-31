@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:project/provider/auth_provider.dart';
+import 'package:project/widget/translator.dart';
 import 'package:provider/provider.dart';
-import 'auth_provider.dart';
 import 'calendar_page.dart';
+import 'l10n/app_localizations.dart';
 import 'login_page.dart';
 
 class CustomDrawer extends StatelessWidget {
@@ -10,16 +12,24 @@ class CustomDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final authProvider = context.watch<AuthProvider>();
+    final l10n = AppLocalizations.of(context)!;
 
     return Drawer(
       child: ListView(
         padding: EdgeInsets.zero,
         children: <Widget>[
           UserAccountsDrawerHeader(
-            accountName:
-                Text(authProvider.userProfile?.nickname ?? '로그인이 필요합니다'),
+            accountName: authProvider.isLoggedIn
+                ? TranslatedText(
+                    text: authProvider.userProfile!.nickname,
+                    style: const TextStyle(
+                        fontSize: 16, fontWeight: FontWeight.bold),
+                  )
+                : Text(l10n.login,
+                    style: const TextStyle(
+                        fontWeight: FontWeight.bold, fontSize: 16)),
             accountEmail:
-                authProvider.isLoggedIn ? const Text("오늘의 축제를 즐겨보세요!") : null,
+                authProvider.isLoggedIn ? Text(l10n.loginTitle) : null,
             currentAccountPicture: CircleAvatar(
               backgroundImage: authProvider.isLoggedIn &&
                       authProvider.userProfile?.imageUrl != null
@@ -27,20 +37,16 @@ class CustomDrawer extends StatelessWidget {
                       as ImageProvider
                   : const AssetImage('assets/arirang1.png'),
             ),
-            decoration: const BoxDecoration(
-              color: Color(0xFF2d3748),
-            ),
+            decoration: const BoxDecoration(color: Color(0xFF2d3748)),
           ),
-
-          // --- 공통 메뉴 (항상 보임) ---
           ListTile(
             leading: const Icon(Icons.home_outlined),
-            title: const Text('홈'),
+            title: Text(l10n.home),
             onTap: () => Navigator.pop(context),
           ),
           ListTile(
             leading: const Icon(Icons.calendar_month_outlined),
-            title: const Text('캘린더'),
+            title: Text(l10n.calendar),
             onTap: () {
               Navigator.pop(context);
               Navigator.push(
@@ -50,48 +56,22 @@ class CustomDrawer extends StatelessWidget {
             },
           ),
           const Divider(),
-
-          // --- 로그인 상태에 따라 달라지는 메뉴 ---
           if (authProvider.isLoggedIn) ...[
-            // 로그인 했을 때만 보임
-            ListTile(
-              leading: const Icon(Icons.chat_outlined),
-              title: const Text('나의 채팅기록'),
-              onTap: () => Navigator.pop(context),
-            ),
-            ListTile(
-              leading: const Icon(Icons.account_circle_outlined),
-              title: const Text('마이페이지'),
-              onTap: () => Navigator.pop(context),
-            ),
-
-            // 로그아웃 버튼의 onTap 로직 변경
             ListTile(
               leading: const Icon(Icons.logout),
-              title: const Text('로그아웃'),
-              onTap: () async {
+              title: Text(l10n.logout),
+              onTap: () {
                 Navigator.pop(context);
                 context.read<AuthProvider>().logout();
-                await showDialog(
-                  context: context,
-                  builder: (dialogContext) => AlertDialog(
-                    title: const Text('로그아웃'),
-                    content: const Text('성공적으로 로그아웃되었습니다.'),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.of(dialogContext).pop(),
-                        child: const Text('확인'),
-                      ),
-                    ],
-                  ),
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(l10n.logoutSuccessMessage)),
                 );
               },
             ),
           ] else ...[
-            // 로그아웃 상태일 때만 보임
             ListTile(
               leading: const Icon(Icons.login),
-              title: const Text('로그인'),
+              title: Text(l10n.login),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.push(context,
