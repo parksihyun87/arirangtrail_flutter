@@ -44,6 +44,7 @@ dependencies:
   intl: ^0.20.2
   cached_network_image: ^3.4.1
   translator: ^1.0.3+1
+  flutter_web_auth_2: ^4.1.0
 
 dev_dependencies:
   flutter_test:
@@ -70,6 +71,9 @@ flutter:
   assets:
     - assets/arirang1.png
     - assets/person.png
+    - assets/google_login.png
+    - assets/kakao_login.png
+    - assets/naver_login.png
 
   # To add assets to your application, add an assets section, like this:
   # assets:

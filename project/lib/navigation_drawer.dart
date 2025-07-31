@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:project/provider/auth_provider.dart';
+import 'package:project/review_page.dart';
 import 'package:project/widget/translator.dart';
 import 'package:provider/provider.dart';
 import 'calendar_page.dart';
@@ -53,6 +54,17 @@ class CustomDrawer extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                       builder: (context) => const CalendarPage()));
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.reviews_outlined),
+            title: const Text('축제후기'),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const ReviewPage()));
             },
           ),
           const Divider(),

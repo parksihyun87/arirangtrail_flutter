@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'api_client.dart';
 import 'join_page.dart';
 import 'l10n/app_localizations.dart';
+import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -68,6 +69,50 @@ class _LoginPageState extends State<LoginPage> {
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
+  }
+
+  Future<void> _performOauthLogin(String provider) async {
+    // final l10n = AppLocalizations.of(context)!;
+    // setState(() => _isLoading = true);
+    // try {
+    //   final url = Uri.parse('http://arirangtrail.duckdns.org/oauth2/authorization/$provider');
+    //   final result = await FlutterWebAuth2.authenticate(
+    //     url: url.toString(),
+    //     callbackUrlScheme: "arirangtrail",
+    //   );
+    //   final token = Uri.parse(result).queryParameters['token'];
+    //   if (token == null) {
+    //     throw Exception('로그인에 성공했지만 토큰을 받지 못했습니다.');
+    //   }
+    //   final response = await _apiClient.get(
+    //     'api/user/me',
+    //     headers: {
+    //       'Authorization': 'Bearer $token',
+    //     },
+    //   );      if (response.statusCode == 200) {
+    //     final responseData = jsonDecode(utf8.decode(response.bodyBytes));
+    //     final userProfile = UserProfile(
+    //       username: responseData['username'],
+    //       nickname: responseData['nickname'],
+    //       imageUrl: responseData['imageUrl'] ?? 'assets/person.png',
+    //     );
+    //     if (mounted) {
+    //       context.read<AuthProvider>().login(userProfile, token);
+    //       _showResultDialog(
+    //           title: l10n.loginSuccess,
+    //           content: l10n.welcomeMessage(userProfile.nickname),
+    //           onConfirm: () => Navigator.of(context).pop());
+    //     }
+    //   } else {
+    //     throw Exception('사용자 정보를 가져오는데 실패했습니다.');
+    //   }
+    // } catch (e) {
+    //   _showResultDialog(
+    //       title: l10n.loginFailed,
+    //       content: e.toString().replaceAll('Exception: ', ''));
+    // } finally {
+    //   if (mounted) setState(() => _isLoading = false);
+    // }
   }
 
   void _showResultDialog(
@@ -140,10 +185,81 @@ class _LoginPageState extends State<LoginPage> {
                   MaterialPageRoute(builder: (context) => const JoinPage())),
               child: Text(l10n.createNewAccount,
                   style: const TextStyle(color: Colors.white)),
-            )
+            ),
+            const SizedBox(height: 20),
+            _buildOauthButton('google'),
+            const SizedBox(height: 10),
+            _buildOauthButton('naver'),
+            const SizedBox(height: 10),
+            _buildOauthButton('kakao'),
           ],
         ),
       ),
     );
+  }
+
+  Widget _buildOauthButton(String provider) {
+    // 기준이 될 버튼의 크기를 상수로 정의합니다.
+    const double buttonWidth = 230.0;
+    const double buttonHeight = 50.0;
+
+    final BorderRadius borderRadius = BorderRadius.circular(buttonHeight / 2);
+
+    switch (provider) {
+      case 'google':
+        return SizedBox(
+          width: buttonWidth,
+          height: buttonHeight,
+          child: ElevatedButton.icon(
+            onPressed: () => _performOauthLogin(provider),
+            icon: Image.asset('assets/google_login.png', height: 24.0),
+            label: const Text('Start with Google'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.white,
+              foregroundColor: Colors.black,
+              // shape 속성을 명시적으로 지정하여 확실하게 알약 모양으로 만듭니다.
+              shape: const StadiumBorder(),
+            ),
+          ),
+        );
+      case 'naver':
+      // ClipRRect로 감싸서 둥근 모서리를 적용합니다.
+        return ClipRRect(
+          borderRadius: borderRadius,
+          child: SizedBox(
+            width: buttonWidth,
+            height: buttonHeight,
+            child: GestureDetector(
+              onTap: () => _performOauthLogin(provider),
+              child: Image.asset(
+                'assets/naver_login.png',
+                // cover를 사용하면 비율을 유지하면서 공간을 꽉 채웁니다 (추천).
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+        );
+      case 'kakao':
+      // 카카오 버튼에도 동일하게 적용합니다.
+        return ClipRRect(
+          borderRadius: borderRadius,
+          child: SizedBox(
+            width: buttonWidth,
+            height: buttonHeight,
+            child: GestureDetector(
+              onTap: () => _performOauthLogin(provider),
+              child: Image.asset(
+                'assets/kakao_login.png',
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+        );
+      default:
+        return const SizedBox(
+          width: buttonWidth,
+          height: buttonHeight,
+        );
+    }
   }
 }
