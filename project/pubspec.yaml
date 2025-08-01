@@ -49,6 +49,7 @@ dependencies:
   url_launcher: ^6.3.2
   share_plus: ^11.0.0
   geolocator: ^14.0.2
+  flutter_web_auth_2: ^4.1.0
 
 dev_dependencies:
   flutter_test:
@@ -75,6 +76,9 @@ flutter:
   assets:
     - assets/arirang1.png
     - assets/person.png
+    - assets/google_login.png
+    - assets/kakao_login.png
+    - assets/naver_login.png
 
   # To add assets to your application, add an assets section, like this:
   # assets:
