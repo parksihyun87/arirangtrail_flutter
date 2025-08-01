@@ -23,6 +23,7 @@ class AuthProvider with ChangeNotifier {
   UserProfile? _userProfile;
   bool _isLoggedIn = false;
   int _totalUnreadCount = 0;
+  String? _token;
 
   final ApiClient _apiClient = ApiClient();
 
@@ -31,11 +32,13 @@ class AuthProvider with ChangeNotifier {
   bool get isLoggedIn => _isLoggedIn;
 
   int get totalUnreadCount => _totalUnreadCount;
+  String? get token => _token;
 
   // 로그인 시, UI 상태를 변경하고 토큰과 프로필 정보를 저장
   Future<void> login(UserProfile userProfile, String token) async {
     _userProfile = userProfile;
     _isLoggedIn = true;
+    _token = token;
 
     await _apiClient.saveToken(token);
     await _saveProfileToPrefs(userProfile);
@@ -48,6 +51,7 @@ class AuthProvider with ChangeNotifier {
     _userProfile = null;
     _isLoggedIn = false;
     _totalUnreadCount = 0;
+    _token = null;
 
     await _apiClient.clearToken();
     await _clearProfileFromPrefs();
@@ -63,6 +67,7 @@ class AuthProvider with ChangeNotifier {
     if (token != null && profile != null) {
       _userProfile = profile;
       _isLoggedIn = true;
+      _token = token;
     }
     notifyListeners();
   }
