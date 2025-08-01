@@ -4,7 +4,29 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="a5fbd55e-8660-481d-883c-3a2ea78cef04" name="Changes" comment="" />
+    <list default="true" id="a5fbd55e-8660-481d-883c-3a2ea78cef04" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/deviceManager.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/project/assets/google_login.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/project/assets/kakao_login.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/project/assets/naver_login.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/project/lib/review_page.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/project/lib/user/simple_join.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Dart_Packages.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Dart_SDK.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Dart_SDK.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/project/android/app/src/main/AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/project/android/app/src/main/AndroidManifest.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/project/lib/navigation_drawer.dart" beforeDir="false" afterPath="$PROJECT_DIR$/project/lib/navigation_drawer.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/project/lib/user/login_page.dart" beforeDir="false" afterPath="$PROJECT_DIR$/project/lib/user/login_page.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/project/linux/flutter/generated_plugin_registrant.cc" beforeDir="false" afterPath="$PROJECT_DIR$/project/linux/flutter/generated_plugin_registrant.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/project/linux/flutter/generated_plugins.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/project/linux/flutter/generated_plugins.cmake" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/project/macos/Flutter/GeneratedPluginRegistrant.swift" beforeDir="false" afterPath="$PROJECT_DIR$/project/macos/Flutter/GeneratedPluginRegistrant.swift" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/project/pubspec.lock" beforeDir="false" afterPath="$PROJECT_DIR$/project/pubspec.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/project/pubspec.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/project/pubspec.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/project/windows/flutter/generated_plugin_registrant.cc" beforeDir="false" afterPath="$PROJECT_DIR$/project/windows/flutter/generated_plugin_registrant.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/project/windows/flutter/generated_plugins.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/project/windows/flutter/generated_plugins.cmake" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -45,7 +67,7 @@
     "cf.first.check.clang-format": "false",
     "cidr.known.project.marker": "true",
     "dart.analysis.tool.window.visible": "false",
-    "git-widget-placeholder": "main",
+    "git-widget-placeholder": "Merging main",
     "io.flutter.reload.alreadyRun": "true",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "C:/Users/803-02/Desktop/arirangtrail_flutter",
