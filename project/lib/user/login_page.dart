@@ -2,9 +2,9 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:project/provider/auth_provider.dart';
 import 'package:provider/provider.dart';
-import 'api_client.dart';
+import '../api_client.dart';
 import 'join_page.dart';
-import 'l10n/app_localizations.dart';
+import '../l10n/app_localizations.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});

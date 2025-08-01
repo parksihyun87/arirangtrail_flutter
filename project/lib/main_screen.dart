@@ -11,7 +11,7 @@ class MainScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(80.0),
+        preferredSize: const Size.fromHeight(100.0),
         child: Container(
           color: const Color(0xFF2d3748),
           child: SafeArea(
@@ -30,7 +30,7 @@ class MainScreen extends StatelessWidget {
                 Expanded(
                   child: Image.asset(
                     'assets/arirang1.png',
-                    height: 80,
+                    height: 100,
                     color: Colors.white,
                     colorBlendMode: BlendMode.srcIn,
                   ),

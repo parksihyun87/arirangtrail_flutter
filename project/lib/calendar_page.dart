@@ -7,6 +7,7 @@ import 'package:project/widget/translator.dart';
 import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'detail_page.dart';
 import 'festival_model.dart';
 import 'l10n/app_localizations.dart';
 
@@ -101,12 +102,16 @@ class _CalendarPageState extends State<CalendarPage> {
   List<Festival> _getEventsForDay(DateTime day) {
     final dayWithoutTime = DateTime.utc(day.year, day.month, day.day);
     List<Festival> events = List.from(_events[dayWithoutTime] ?? []);
+
     switch (_sortOrder) {
       case 'name':
         events.sort((a, b) => a.title.compareTo(b.title));
         break;
       case 'ending':
         events.sort((a, b) => a.eventenddate.compareTo(b.eventenddate));
+        break;
+      case 'views':
+      default:
         break;
     }
     return events;
@@ -131,7 +136,10 @@ class _CalendarPageState extends State<CalendarPage> {
     final locale = context.watch<LocaleProvider>().locale;
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.calendar)),
+      appBar: AppBar(
+        title: Text(l10n.calendar),
+        centerTitle: true,
+      ),
       body: Column(
         children: [
           TableCalendar(
@@ -214,11 +222,13 @@ class _CalendarPageState extends State<CalendarPage> {
                     _sortOrder == 'name',
                     _sortOrder == 'ending'
                   ],
-                  onPressed: (index) => setState(() {
-                    if (index == 0) _sortOrder = 'views';
-                    if (index == 1) _sortOrder = 'name';
-                    if (index == 2) _sortOrder = 'ending';
-                  }),
+                  onPressed: (index) {
+                    setState(() {
+                      if (index == 0) _sortOrder = 'views';
+                      if (index == 1) _sortOrder = 'name';
+                      if (index == 2) _sortOrder = 'ending';
+                    });
+                  },
                   constraints:
                       const BoxConstraints(minHeight: 32.0, minWidth: 60.0),
                   borderRadius: BorderRadius.circular(8),
@@ -240,6 +250,7 @@ class _CalendarPageState extends State<CalendarPage> {
                 itemBuilder: (context, index) {
                   final festival = selectedDayEvents[index];
                   return Card(
+                    key: ValueKey(festival.contentid),
                     margin:
                         const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     clipBehavior: Clip.antiAlias,
@@ -259,7 +270,8 @@ class _CalendarPageState extends State<CalendarPage> {
                               width: 80,
                               height: 80,
                               color: Colors.grey[200],
-                              child: const Icon(Icons.image_not_supported)),
+                              child: const Icon(Icons.image_not_supported),
+                            ),
                       title: TranslatedText(
                         text: festival.title,
                         style: const TextStyle(fontWeight: FontWeight.bold),
@@ -268,7 +280,15 @@ class _CalendarPageState extends State<CalendarPage> {
                         text: festival.addr1,
                       ),
                       onTap: () {
-                        /* TODO: 상세 페이지로 이동 */
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => DetailPage(
+                              festivalId: festival.contentid,
+                              initialTitle: festival.title,
+                            ),
+                          ),
+                        );
                       },
                     ),
                   );
