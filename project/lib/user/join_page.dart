@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'api_client.dart';
-import 'l10n/app_localizations.dart';
+import '../api_client.dart';
+import '../l10n/app_localizations.dart';
 
 class JoinPage extends StatefulWidget {
   const JoinPage({super.key});

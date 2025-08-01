@@ -2,9 +2,9 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:project/provider/auth_provider.dart';
 import 'package:provider/provider.dart';
-import 'api_client.dart';
+import '../api_client.dart';
+import '../l10n/app_localizations.dart';
 import 'join_page.dart';
-import 'l10n/app_localizations.dart';
 import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
 
 class LoginPage extends StatefulWidget {
@@ -72,47 +72,49 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> _performOauthLogin(String provider) async {
-    // final l10n = AppLocalizations.of(context)!;
-    // setState(() => _isLoading = true);
-    // try {
-    //   final url = Uri.parse('http://arirangtrail.duckdns.org/oauth2/authorization/$provider');
-    //   final result = await FlutterWebAuth2.authenticate(
-    //     url: url.toString(),
-    //     callbackUrlScheme: "arirangtrail",
-    //   );
-    //   final token = Uri.parse(result).queryParameters['token'];
-    //   if (token == null) {
-    //     throw Exception('로그인에 성공했지만 토큰을 받지 못했습니다.');
-    //   }
-    //   final response = await _apiClient.get(
-    //     'api/user/me',
-    //     headers: {
-    //       'Authorization': 'Bearer $token',
-    //     },
-    //   );      if (response.statusCode == 200) {
-    //     final responseData = jsonDecode(utf8.decode(response.bodyBytes));
-    //     final userProfile = UserProfile(
-    //       username: responseData['username'],
-    //       nickname: responseData['nickname'],
-    //       imageUrl: responseData['imageUrl'] ?? 'assets/person.png',
-    //     );
-    //     if (mounted) {
-    //       context.read<AuthProvider>().login(userProfile, token);
-    //       _showResultDialog(
-    //           title: l10n.loginSuccess,
-    //           content: l10n.welcomeMessage(userProfile.nickname),
-    //           onConfirm: () => Navigator.of(context).pop());
-    //     }
-    //   } else {
-    //     throw Exception('사용자 정보를 가져오는데 실패했습니다.');
-    //   }
-    // } catch (e) {
-    //   _showResultDialog(
-    //       title: l10n.loginFailed,
-    //       content: e.toString().replaceAll('Exception: ', ''));
-    // } finally {
-    //   if (mounted) setState(() => _isLoading = false);
-    // }
+    final l10n = AppLocalizations.of(context)!;
+    setState(() => _isLoading = true);
+    try {
+      final url = Uri.parse(
+          'http://arirangtrail.duckdns.org/oauth2/authorization/$provider');
+      final result = await FlutterWebAuth2.authenticate(
+        url: url.toString(),
+        callbackUrlScheme: "arirangtrail",
+      );
+      final uri = Uri.parse(result);
+      if (uri.path == '/oauth-callback') {
+        final token = uri.queryParameters['code'];
+        if (token != null) {
+          print("로그인 성공! 토큰: $token");
+        } else {
+          throw Exception('로그인 콜백을 받았지만 토큰이 없습니다.');
+        }
+      }
+
+      else if (uri.path == '/simplejoin') {
+        final email = uri.queryParameters['email'];
+        final name = uri.queryParameters['name'];
+
+        print("신규 회원입니다. 회원가입 페이지로 이동합니다.");
+        print("이메일: $email, 이름: $name");
+
+        // Navigator.of(context).push(MaterialPageRoute(
+        //   builder: (_) => SignUpPage(email: email, name: name),
+        // ));
+
+      }
+      // [시나리오 3] 예상치 못한 경로
+      else {
+        throw Exception('알 수 없는 콜백 URL입니다: $result');
+      }
+
+    }catch(e){
+      _showResultDialog(
+          title: l10n.loginFailed,
+          content: e.toString().replaceAll('Exception: ', ''));
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
   void _showResultDialog(
