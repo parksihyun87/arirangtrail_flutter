@@ -9,9 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 final apiClient = ApiClient();
 
 class ApiClient {
-  // final String _baseUrl = dotenv.env['DEV_API_BASE_URL']!;
-  // final String _baseUrl = 'http://arirangtrail.duckdns.org/';
-  final String _baseUrl = 'http://10.0.2.2:8080';
+  final String _baseUrl = dotenv.env['DEV_API_BASE_URL']!;
   bool _isRefreshing = false;
 
   // === 토큰 관리 (SharedPreferences 접근) ===

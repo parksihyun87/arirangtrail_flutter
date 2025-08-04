@@ -15,7 +15,6 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final ApiClient _apiClient = ApiClient();
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isLoading = false;
@@ -27,47 +26,84 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
+  // LoginPage.dart 안에
+
   Future<void> _performLogin() async {
+    // 1. 필요한 객체들을 미리 준비합니다.
+    final authProvider = context.read<AuthProvider>();
     final l10n = AppLocalizations.of(context)!;
     final username = _usernameController.text;
     final password = _passwordController.text;
 
+    // 2. 기본적인 입력값 검증
     if (username.isEmpty || password.isEmpty) {
       _showResultDialog(
           title: l10n.inputError, content: l10n.errorEnterAllFields);
       return;
     }
+
+    // 3. 로딩 상태 시작
     setState(() => _isLoading = true);
+
+    // 4. API 호출 및 결과 처리 (✨ 여기가 완전히 바뀝니다 ✨)
     try {
-      final response = await _apiClient
-          .postForm('api/login', {'username': username, 'password': password});
+      // 4-1. 싱글톤 apiClient를 사용하여 로그인 API를 호출합니다.
+      final response = await apiClient.postForm('api/login', {
+        'username': username,
+        'password': password
+      });
+
+      // 4-2. 서버로부터 성공(200 OK) 응답을 받았을 경우
       if (response.statusCode == 200) {
+        // 응답 본문(사용자 정보)과 헤더(토큰)를 파싱합니다.
         final responseData = jsonDecode(utf8.decode(response.bodyBytes));
-        final token =
-            response.headers['authorization'] ?? responseData['accessToken'];
-        if (token == null) throw Exception('로그인에 성공했지만 토큰을 받지 못했습니다.');
-        final userProfile = UserProfile(
-          username: responseData['username'] ?? username,
-          nickname: responseData['nickname'] ?? '여행자 $username',
-          imageUrl: responseData['imageUrl'] ?? 'assets/person.png',
-        );
+        final accessToken = response.headers['authorization'];
+
+        // Refresh Token을 'set-cookie' 헤더에서 추출합니다.
+        String? refreshToken;
+        final setCookieHeader = response.headers['set-cookie'];
+        if (setCookieHeader != null) {
+          final cookie = setCookieHeader.split(';').firstWhere((c) => c.trim().startsWith('refresh='));
+          refreshToken = cookie.split('=').last;
+        }
+
+        // Access Token 또는 Refresh Token 둘 중 하나라도 없으면 에러로 간주합니다.
+        if (accessToken == null || refreshToken == null) {
+          throw Exception('서버로부터 토큰 정보를 받지 못했습니다.');
+        }
+
+        // 파싱한 정보로 UserProfile 객체를 만듭니다.
+        final userProfile = UserProfile.fromJson(responseData);
+
+        // 4-3. 모든 정보가 준비되면, AuthProvider의 login 함수를 호출하여 상태를 업데이트합니다.
         if (mounted) {
-          context.read<AuthProvider>().login(userProfile, token);
+          await authProvider.login(userProfile, accessToken, refreshToken);
+
+          // 성공 다이얼로그를 보여줍니다.
           _showResultDialog(
               title: l10n.loginSuccess,
               content: l10n.welcomeMessage(userProfile.nickname),
-              onConfirm: () => Navigator.of(context).pop());
+              // 확인 버튼을 누르면 이전 화면으로 돌아갑니다 (보통 메인 화면)
+              onConfirm: () => Navigator.of(context).popUntil((route) => route.isFirst)
+          );
         }
-      } else {
+      }
+      // 4-4. 서버로부터 실패 응답을 받았을 경우
+      else {
         final errorData = jsonDecode(utf8.decode(response.bodyBytes));
-        throw Exception(errorData['message'] ?? '아이디 또는 비밀번호를 확인해주세요.');
+        // 서버가 보내준 에러 메시지를 사용합니다.
+        throw Exception(errorData['error'] ?? '알 수 없는 오류가 발생했습니다.');
       }
     } catch (e) {
+      // 4-5. API 호출 중 발생한 모든 종류의 에러를 여기서 처리합니다.
       _showResultDialog(
           title: l10n.loginFailed,
           content: e.toString().replaceAll('Exception: ', ''));
     } finally {
-      if (mounted) setState(() => _isLoading = false);
+      // 5. 성공하든 실패하든, 로딩 상태를 종료합니다.
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
