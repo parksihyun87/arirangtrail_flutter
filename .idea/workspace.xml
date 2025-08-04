@@ -4,15 +4,7 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="a5fbd55e-8660-481d-883c-3a2ea78cef04" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/lib/l10n/app_localizations.dart" beforeDir="false" afterPath="$PROJECT_DIR$/project/lib/l10n/app_localizations.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/lib/l10n/app_localizations_en.dart" beforeDir="false" afterPath="$PROJECT_DIR$/project/lib/l10n/app_localizations_en.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/lib/l10n/app_localizations_ko.dart" beforeDir="false" afterPath="$PROJECT_DIR$/project/lib/l10n/app_localizations_ko.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/lib/user/login_page.dart" beforeDir="false" afterPath="$PROJECT_DIR$/project/lib/user/login_page.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/lib/user/simple_join.dart" beforeDir="false" afterPath="$PROJECT_DIR$/project/lib/user/simple_join.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/pubspec.lock" beforeDir="false" afterPath="$PROJECT_DIR$/project/pubspec.lock" afterDir="false" />
-    </list>
+    <list default="true" id="a5fbd55e-8660-481d-883c-3a2ea78cef04" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -35,7 +27,7 @@
   &quot;associatedIndex&quot;: 7
 }</component>
   <component name="ProjectId" id="30WrlEvGVngbYkWuOwSa4fxJReL" />
-  <component name="ProjectLevelVcsManager">
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true">
     <ConfirmationsSetting value="2" id="Add" />
   </component>
   <component name="ProjectViewState">
@@ -53,7 +45,7 @@
     "cf.first.check.clang-format": "false",
     "cidr.known.project.marker": "true",
     "dart.analysis.tool.window.visible": "false",
-    "git-widget-placeholder": "main",
+    "git-widget-placeholder": "dev__mingyu",
     "io.flutter.reload.alreadyRun": "true",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "C:/Users/803-02/Desktop/arirangtrail_flutter",
