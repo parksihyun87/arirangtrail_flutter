@@ -122,4 +122,59 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get calendarComment => '해당 날짜에 예정된 축제가 없습니다.';
+
+  @override
+  String get eventPeriod => '행사 기간';
+
+  @override
+  String get performanceTime => '공연 시간';
+
+  @override
+  String get usageFee => '이용 요금';
+
+  @override
+  String get phoneNumber => '전화번호';
+
+  @override
+  String get directions => '오시는 길';
+
+  @override
+  String get getDirections => '길찾기';
+
+  @override
+  String get askWhichMap => '어떤 지도로 길을 찾으시겠어요?';
+
+  @override
+  String get kakaoMap => '카카오맵';
+
+  @override
+  String get googleMap => '구글맵';
+
+  @override
+  String get notification => '알림';
+
+  @override
+  String get ok => '확인';
+
+  @override
+  String get unsupportedDirections => '이 장소는 길찾기를 지원하지 않습니다.';
+
+  @override
+  String get mapNotAvailable => '지도 정보를 제공하지 않습니다.';
+
+  @override
+  String get locationServiceDisabled => '위치 서비스를 활성화해주세요.';
+
+  @override
+  String get locationPermissionDenied => '위치 권한이 거부되었습니다.';
+
+  @override
+  String get locationPermissionPermanentlyDenied =>
+      '위치 권한이 영구적으로 거부되었습니다. 앱 설정에서 권한을 허용해주세요.';
+
+  @override
+  String get couldNotLaunchGoogleMaps => '구글 맵을 열 수 없습니다.';
+
+  @override
+  String get couldNotGetLocation => '현재 위치를 가져올 수 없습니다.';
 }

@@ -12,6 +12,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import 'package:project/widget/translator.dart';
 import 'festival_model.dart';
+import 'l10n/app_localizations.dart';
 
 const SERVICE_KEY =
     "WCIc8hzzBS3Jdod%2BVa357JmB%2FOS0n4D2qPHaP9PkN4bXIfcryZyg4iaZeTj1fEYJ%2B8q2Ol8FIGe3RkW3d72FHA%3D%3D";
@@ -202,6 +203,8 @@ class _DetailPageState extends State<DetailPage> {
       ...data.images.map((img) => img.originimgurl)
     ];
 
+    final l10n = AppLocalizations.of(context)!;
+
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -245,16 +248,19 @@ class _DetailPageState extends State<DetailPage> {
                         .replaceAll(RegExp('<[^>]*>'), ''),
                     style: Theme.of(context).textTheme.bodyMedium),
                 const Divider(height: 32),
-                _buildInfoRow(Icons.calendar_today, '행사 기간',
+                _buildInfoRow(Icons.calendar_today, l10n.eventPeriod,
                     '${detail.eventstartdate} ~ ${detail.eventenddate}'),
                 if (detail.playtime.isNotEmpty)
-                  _buildInfoRow(Icons.access_time, '공연 시간', detail.playtime),
+                  _buildInfoRow(
+                      Icons.access_time, l10n.performanceTime, detail.playtime),
                 if (detail.usetimefestival.isNotEmpty)
-                  _buildInfoRow(Icons.payment, '이용 요금', detail.usetimefestival),
+                  _buildInfoRow(
+                      Icons.payment, l10n.usageFee, detail.usetimefestival),
                 if (detail.tel.isNotEmpty)
-                  _buildInfoRow(Icons.phone, '전화번호', detail.tel),
+                  _buildInfoRow(Icons.phone, l10n.phoneNumber, detail.tel),
                 const SizedBox(height: 24),
-                Text('오시는 길', style: Theme.of(context).textTheme.titleLarge),
+                Text(l10n.directions,
+                    style: Theme.of(context).textTheme.titleLarge),
                 const SizedBox(height: 8),
                 TranslatedText(text: detail.addr1),
                 const SizedBox(height: 16),
@@ -265,12 +271,12 @@ class _DetailPageState extends State<DetailPage> {
                         height: 200,
                         alignment: Alignment.center,
                         color: Colors.grey[200],
-                        child: const Text('지도 정보를 제공하지 않습니다.'),
+                        child: Text(l10n.mapNotAvailable),
                       ),
                 const SizedBox(height: 16),
                 ElevatedButton(
                     onPressed: () => _showDirectionsDialog(context, detail),
-                    child: const Text('길찾기')),
+                    child: Text(l10n.getDirections)),
               ],
             ),
           ),
@@ -308,16 +314,17 @@ class _DetailPageState extends State<DetailPage> {
 
   Future<void> _showDirectionsDialog(
       BuildContext context, FestivalDetail destination) async {
+    final l10n = AppLocalizations.of(context)!;
     if (destination.mapx == '0.0' || destination.mapy == '0.0') {
       showDialog(
           context: context,
           builder: (context) => AlertDialog(
-                title: const Text('알림'),
-                content: const Text('이 장소는 길찾기를 지원하지 않습니다.'),
+                title: Text(l10n.notification),
+                content: Text(l10n.unsupportedDirections),
                 actions: [
                   TextButton(
                       onPressed: () => Navigator.of(context).pop(),
-                      child: const Text('확인'))
+                      child: Text(l10n.ok))
                 ],
               ));
       return;
@@ -326,14 +333,14 @@ class _DetailPageState extends State<DetailPage> {
     final String? mapType = await showDialog<String>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('어떤 지도로 길을 찾으시겠어요?'),
+        title: Text(l10n.askWhichMap),
         content: TranslatedText(text: destination.title),
         actions: [
           TextButton(
-              child: const Text('카카오맵'),
+              child: Text(l10n.kakaoMap),
               onPressed: () => Navigator.of(dialogContext).pop('kakao')),
           TextButton(
-              child: const Text('구글맵'),
+              child: Text(l10n.googleMap),
               onPressed: () => Navigator.of(dialogContext).pop('google')),
         ],
       ),
@@ -350,11 +357,12 @@ class _DetailPageState extends State<DetailPage> {
 
   Future<void> _launchGoogleMapsDirections(String lat, String lng) async {
     if (!mounted) return;
+    final l10n = AppLocalizations.of(context)!;
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text('위치 서비스를 활성화해주세요.')));
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(l10n.locationServiceDisabled)));
         return;
       }
     }
@@ -364,16 +372,16 @@ class _DetailPageState extends State<DetailPage> {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
         if (mounted) {
-          ScaffoldMessenger.of(context)
-              .showSnackBar(const SnackBar(content: Text('위치 권한이 거부되었습니다.')));
+          ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(l10n.locationPermissionDenied)));
         }
         return;
       }
     }
     if (permission == LocationPermission.deniedForever) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            content: Text('위치 권한이 영구적으로 거부되었습니다. 앱 설정에서 권한을 허용해주세요.')));
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(l10n.locationPermissionPermanentlyDenied)));
         return;
       }
     }
@@ -386,6 +394,7 @@ class _DetailPageState extends State<DetailPage> {
       print('Current Position: ${position.latitude}, ${position.longitude}');
 
       if (!mounted) return;
+      final currentLang = AppLocalizations.of(context)!.localeName;
 
       final url = Uri.parse(
           'https://www.google.com/maps/dir/?api=1&origin=${position.latitude},${position.longitude}&destination=$lat,$lng');
@@ -393,15 +402,15 @@ class _DetailPageState extends State<DetailPage> {
         await launchUrl(url);
       } else {
         if (mounted) {
-          ScaffoldMessenger.of(context)
-              .showSnackBar(const SnackBar(content: Text('구글 맵을 열 수 없습니다.')));
+          ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(l10n.couldNotLaunchGoogleMaps)));
         }
       }
     } catch (e) {
       print('Failed to get position: $e');
       if (mounted) {
         ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text('현재 위치를 가져올 수 없습니다.')));
+            .showSnackBar(SnackBar(content: Text(l10n.couldNotGetLocation)));
       }
     }
   }

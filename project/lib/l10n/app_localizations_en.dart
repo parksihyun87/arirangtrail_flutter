@@ -124,4 +124,60 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get calendarComment =>
       'There are no festivals scheduled for that date.';
+
+  @override
+  String get eventPeriod => 'Event Period';
+
+  @override
+  String get performanceTime => 'Performance Time';
+
+  @override
+  String get usageFee => 'Usage Fee';
+
+  @override
+  String get phoneNumber => 'Phone Number';
+
+  @override
+  String get directions => 'Directions';
+
+  @override
+  String get getDirections => 'Get Directions';
+
+  @override
+  String get askWhichMap => 'Which map would you like to use?';
+
+  @override
+  String get kakaoMap => 'Kakao Map';
+
+  @override
+  String get googleMap => 'Google Map';
+
+  @override
+  String get notification => 'Notification';
+
+  @override
+  String get ok => 'OK';
+
+  @override
+  String get unsupportedDirections =>
+      'Directions are not supported for this location.';
+
+  @override
+  String get mapNotAvailable => 'Map information is not available.';
+
+  @override
+  String get locationServiceDisabled => 'Please enable location services.';
+
+  @override
+  String get locationPermissionDenied => 'Location permission has been denied.';
+
+  @override
+  String get locationPermissionPermanentlyDenied =>
+      'Location permission is permanently denied. Please enable it in app settings.';
+
+  @override
+  String get couldNotLaunchGoogleMaps => 'Could not launch Google Maps.';
+
+  @override
+  String get couldNotGetLocation => 'Could not get current location.';
 }
