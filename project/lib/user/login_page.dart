@@ -121,8 +121,7 @@ class _LoginPageState extends State<LoginPage> {
       else {
         throw Exception('알 수 없는 콜백 URL입니다: $result');
       }
-
-    }catch(e){
+    } catch (e) {
       _showResultDialog(
           title: l10n.loginFailed,
           content: e.toString().replaceAll('Exception: ', ''));
@@ -131,14 +130,14 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  void _showResultDialog(
-      {required String title,
-      required String content,
-      VoidCallback? onConfirm}) {
+  void _showResultDialog({required String title,
+    required String content,
+    VoidCallback? onConfirm}) {
     final l10n = AppLocalizations.of(context)!;
     showDialog(
         context: context,
-        builder: (context) => AlertDialog(
+        builder: (context) =>
+            AlertDialog(
               title: Text(title),
               content: Text(content),
               actions: [
@@ -197,8 +196,10 @@ class _LoginPageState extends State<LoginPage> {
             ),
             const SizedBox(height: 24),
             TextButton(
-              onPressed: () => Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => const JoinPage())),
+              onPressed: () =>
+                  Navigator.push(context,
+                      MaterialPageRoute(
+                          builder: (context) => const JoinPage())),
               child: Text(l10n.createNewAccount,
                   style: const TextStyle(color: Colors.white)),
             ),
