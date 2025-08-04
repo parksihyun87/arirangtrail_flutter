@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:project/provider/auth_provider.dart';
+import 'package:project/user/simple_join.dart';
 import 'package:provider/provider.dart';
 import '../api_client.dart';
 import 'join_page.dart';
@@ -76,7 +77,8 @@ class _LoginPageState extends State<LoginPage> {
     setState(() => _isLoading = true);
     try {
       final url = Uri.parse(
-          'http://arirangtrail.duckdns.org/oauth2/authorization/$provider');
+          'http://arirangtrail.duckdns.org/oauth2/authorization/$provider?client_type=app');
+
       final result = await FlutterWebAuth2.authenticate(
         url: url.toString(),
         callbackUrlScheme: "arirangtrail",
@@ -85,7 +87,19 @@ class _LoginPageState extends State<LoginPage> {
       if (uri.path == '/oauth-callback') {
         final token = uri.queryParameters['code'];
         if (token != null) {
-          print("로그인 성공! 토큰: $token");
+          try{
+            final response = await _apiClient.postForm("/api/app/login",
+              {'code': token},
+            );
+            if (response.statusCode == 200) {
+              final responseData = jsonDecode(utf8.decode(response.bodyBytes));
+              print(responseData);
+            }
+          }catch(e){
+            print(e.toString());
+          }
+
+
         } else {
           throw Exception('로그인 콜백을 받았지만 토큰이 없습니다.');
         }
@@ -93,15 +107,15 @@ class _LoginPageState extends State<LoginPage> {
 
       else if (uri.path == '/simplejoin') {
         final email = uri.queryParameters['email'];
-        final name = uri.queryParameters['name'];
+        final username = uri.queryParameters['username'];
 
         print("신규 회원입니다. 회원가입 페이지로 이동합니다.");
-        print("이메일: $email, 이름: $name");
-
-        // Navigator.of(context).push(MaterialPageRoute(
-        //   builder: (_) => SignUpPage(email: email, name: name),
-        // ));
-
+        print("이메일: $email, 이름: $username");
+        if(email != null && username != null){
+          Navigator.of(context).push(MaterialPageRoute(
+            builder: (_) => SimpleJoin(email: email, username: username),
+          ));
+        }
       }
       // [시나리오 3] 예상치 못한 경로
       else {
