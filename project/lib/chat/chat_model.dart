@@ -40,8 +40,6 @@ class ChatRoom {
   }
 }
 
-
-
 enum MessageType {
   ENTER,
   TALK,
@@ -52,15 +50,19 @@ enum MessageType {
 
 // 2. 새로운 ChatMessage 모델
 class ChatMessage {
-  final MessageType type;      // 메시지 타입 (입장, 대화, 퇴장 등)
+  final MessageType type;
+  final String? sender;// 메시지 타입 (입장, 대화, 퇴장 등)
   final String? nickname;     // 보낸 사람 닉네임 (TALK, IMAGE 메시지에만 존재)
   final String message;        // 메시지 내용 또는 시스템 메시지
+  final int? messageSeq;
   // final DateTime timestamp; // DTO에 타임스탬프가 없으므로 일단 제외. 필요 시 추가해야 함.
 
   ChatMessage({
     required this.type,
+    this.sender,
     this.nickname,
     required this.message,
+    this.messageSeq
   });
 
   // 3. 실제 DTO를 파싱하는 똑똑한 '공장(factory)'
@@ -87,7 +89,9 @@ class ChatMessage {
     return ChatMessage(
       type: type,
       nickname: json['nickname'], // 서버 DTO의 'nickname' 필드를 그대로 사용
+      sender: json['sender'],
       message: json['message'],   // 서버 DTO의 'message' 필드를 그대로 사용
+      messageSeq: json['messageSeq']
     );
   }
 }

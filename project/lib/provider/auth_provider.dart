@@ -1,7 +1,9 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:project/api_client.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:project/api_client.dart';
 
 class UserProfile {
   final String username;
@@ -24,6 +26,9 @@ class AuthProvider with ChangeNotifier {
   bool _isLoggedIn = false;
   int _totalUnreadCount = 0;
   String? _token;
+  //재발급 로직
+  DateTime? _expiresAt;
+  Timer? _refreshTimer;
 
   final ApiClient _apiClient = ApiClient();
 

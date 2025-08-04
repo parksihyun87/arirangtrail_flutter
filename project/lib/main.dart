@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:project/provider/auth_provider.dart';
 import 'package:project/provider/locale_provider.dart';
 import 'package:project/splash_screen.dart';
@@ -8,6 +9,7 @@ import 'l10n/app_localizations.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: ".env");
   await initializeDateFormatting('ko_KR', null);
 
   runApp(

@@ -1,9 +1,12 @@
 import 'dart:convert';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiClient {
-  final String _baseUrl = 'http://arirangtrail.duckdns.org/';
+  // final String _baseUrl = 'http://arirangtrail.duckdns.org/';
+  final String _baseUrl = dotenv.env['DEV_API_BASE_URL']!; // 로컬 테스트 시
+  // final String _baseUrl = dotenv.env['PROD_API_BASE_URL']!; // 배포 시
 
   Future<void> saveToken(String token) async {
     final prefs = await SharedPreferences.getInstance();
