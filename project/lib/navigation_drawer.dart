@@ -69,6 +69,11 @@ class CustomDrawer extends StatelessWidget {
             },
           ),
           // 로그인한 사용자에게만 채팅방 메뉴가 보이도록 합니다.
+            ListTile(
+              leading: const Icon(Icons.chat_bubble_outline), // 채팅 아이콘
+              title: const Text('채팅방 (로그인 후 이용)'), // 메뉴 이름
+              onTap: () {}
+            ),
           if (authProvider.isLoggedIn)
             ListTile(
               leading: const Icon(Icons.chat_bubble_outline), // 채팅 아이콘

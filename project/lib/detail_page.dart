@@ -1,19 +1,45 @@
 import 'dart:convert';
 
-// import 'package:flutter/cupertino.dart'; //ios 설정 시
 import 'package:flutter/material.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_swiper_view/flutter_swiper_view.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:project/widget/festival_map.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'package:project/widget/translator.dart';
 import 'festival_model.dart';
+import 'l10n/app_localizations.dart';
 
 const SERVICE_KEY =
     "WCIc8hzzBS3Jdod%2BVa357JmB%2FOS0n4D2qPHaP9PkN4bXIfcryZyg4iaZeTj1fEYJ%2B8q2Ol8FIGe3RkW3d72FHA%3D%3D";
+
+// 1. 데이터를 하나로 묶어줄 새로운 클래스 정의
+class FestivalPageData {
+  final FestivalDetail detail;
+  final List<FestivalImage> images;
+  final LatLng? location;
+  final Set<Marker> markers;
+
+  FestivalPageData({
+    required this.detail,
+    required this.images,
+    this.location,
+    required this.markers,
+  });
+}
+
+// ✨ 2. 커스텀 캐시 매니저 정의
+final CacheManager customCacheManager = CacheManager(
+  Config(
+    'customImageCache',
+    stalePeriod: const Duration(days: 7),
+    maxNrOfCacheObjects: 200,
+  ),
+);
 
 class DetailPage extends StatefulWidget {
   final String festivalId;
@@ -27,20 +53,16 @@ class DetailPage extends StatefulWidget {
 }
 
 class _DetailPageState extends State<DetailPage> {
-  FestivalDetail? _festivalDetail;
-  List<FestivalImage> _images = [];
-  bool _isLoading = true;
-  String? _error;
-  LatLng? _festivalLocation;
-  final Set<Marker> _markers = {};
+  late Future<FestivalPageData> _festivalDataFuture;
 
   @override
   void initState() {
     super.initState();
-    _fetchDetails();
+    _festivalDataFuture = _fetchDetails();
+    _debugCurrentLocation();
   }
 
-  Future<void> _fetchDetails() async {
+  Future<FestivalPageData> _fetchDetails() async {
     try {
       final commonUri = Uri.parse(
           'https://apis.data.go.kr/B551011/KorService2/detailCommon2?serviceKey=$SERVICE_KEY&MobileApp=AppTest&MobileOS=ETC&_type=json&contentId=${widget.festivalId}');
@@ -55,62 +77,70 @@ class _DetailPageState extends State<DetailPage> {
         http.get(imageUri),
       ]);
 
-      print(
-          'Common Response: ${responses[0].statusCode} - ${responses[0].body}');
-      print(
-          'Intro Response: ${responses[1].statusCode} - ${responses[1].body}');
-      print(
-          'Image Response: ${responses[2].statusCode} - ${responses[2].body}');
-
       final commonData = _getSafeItem(responses[0]);
-      final introData =
-          (responses[1].statusCode == 200) ? _getSafeItem(responses[1]) : null;
-      final imageDataList = (responses[2].statusCode == 200)
-          ? _getSafeListOfItems(responses[2])
-          : [];
-
       if (commonData == null) {
         final decoded = jsonDecode(responses[0].body);
         throw Exception(
             '필수 상세 정보(Common)를 찾을 수 없습니다: ${decoded['response']?['header']?['resultMsg'] ?? 'Unknown error'}');
       }
 
-      setState(() {
-        _festivalDetail = FestivalDetail.fromJsons(commonData, introData ?? {});
-        _images =
-            imageDataList.map((item) => FestivalImage.fromJson(item)).toList();
-        _setupMapData();
-        _isLoading = false;
-      });
+      final introData =
+          (responses[1].statusCode == 200) ? _getSafeItem(responses[1]) : null;
+      final imageDataList = (responses[2].statusCode == 200)
+          ? _getSafeListOfItems(responses[2])
+          : [];
+
+      final detail = FestivalDetail.fromJsons(commonData, introData ?? {});
+      final images =
+          imageDataList.map((item) => FestivalImage.fromJson(item)).toList();
+
+      final lat = double.tryParse(detail.mapy);
+      final lng = double.tryParse(detail.mapx);
+      LatLng? location;
+      Set<Marker> markers = {};
+
+      if (lat != null && lng != null && lat != 0.0 && lng != 0.0) {
+        location = LatLng(lat, lng);
+        markers.add(Marker(
+          markerId: MarkerId(detail.contentid),
+          position: location,
+          infoWindow: InfoWindow(title: detail.title),
+        ));
+      }
+
+      return FestivalPageData(
+          detail: detail, images: images, location: location, markers: markers);
     } catch (e) {
       print('상세 정보 로딩 실패: $e');
-      setState(() {
-        _error = '정보를 불러오는 데 실패했습니다.';
-        _isLoading = false;
-      });
+      rethrow;
     }
   }
 
-  void _setupMapData() {
-    if (_festivalDetail == null) return;
-
-    if (_festivalDetail!.mapx.isEmpty ||
-        _festivalDetail!.mapy.isEmpty ||
-        _festivalDetail!.mapx == '0.0' ||
-        _festivalDetail!.mapy == '0.0') {
+  Future<void> _debugCurrentLocation() async {
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      print("❌ 위치 서비스 꺼짐");
       return;
     }
 
-    final lat = double.tryParse(_festivalDetail!.mapy);
-    final lng = double.tryParse(_festivalDetail!.mapx);
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+    }
 
-    if (lat != null && lng != null) {
-      _festivalLocation = LatLng(lat, lng);
-      _markers.add(Marker(
-        markerId: MarkerId(_festivalDetail!.contentid),
-        position: _festivalLocation!,
-        infoWindow: InfoWindow(title: _festivalDetail!.title),
-      ));
+    if (permission == LocationPermission.denied ||
+        permission == LocationPermission.deniedForever) {
+      print("❌ 위치 권한 없음");
+      return;
+    }
+
+    try {
+      final position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+      print("📍 현재 위치 (디버그): ${position.latitude}, ${position.longitude}");
+    } catch (e) {
+      print("❌ 위치 가져오기 실패: $e");
     }
   }
 
@@ -119,10 +149,7 @@ class _DetailPageState extends State<DetailPage> {
     try {
       final decoded = jsonDecode(response.body);
       final body = decoded['response']?['body'];
-      if (body == null || body['items'] == '' || body['items'] == null)
-        return null;
-      final item = body['items']?['item'];
-      if (item == null) return null;
+      final item = body?['items']?['item'];
       return (item is List) ? (item.isNotEmpty ? item[0] : null) : item;
     } catch (e) {
       print('JSON 파싱 오류: $e');
@@ -134,9 +161,7 @@ class _DetailPageState extends State<DetailPage> {
     if (response.statusCode != 200) return [];
     final decoded = jsonDecode(response.body);
     final body = decoded['response']?['body'];
-    if (body == null || body['items'] == '' || body['items'] == null) return [];
-    final item = body['items']?['item'];
-    if (item == null) return [];
+    final item = body?['items']?['item'];
     if (item is List) {
       return item.whereType<Map<String, dynamic>>().toList();
     } else if (item is Map) {
@@ -149,27 +174,37 @@ class _DetailPageState extends State<DetailPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: TranslatedText(
-            text: _isLoading
-                ? widget.initialTitle
-                : _festivalDetail?.title ?? ''),
+        title: TranslatedText(text: widget.initialTitle),
         centerTitle: true,
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _error != null
-              ? Center(child: Text(_error!))
-              : _buildDetailContent(),
+      body: FutureBuilder<FestivalPageData>(
+        future: _festivalDataFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (snapshot.hasError) {
+            return Center(child: Text('오류가 발생했습니다: ${snapshot.error}'));
+          }
+          if (!snapshot.hasData) {
+            return const Center(child: Text('표시할 데이터가 없습니다.'));
+          }
+          final festivalData = snapshot.data!;
+          return _buildDetailContent(festivalData);
+        },
+      ),
     );
   }
 
-  Widget _buildDetailContent() {
-    if (_festivalDetail == null) return const Center(child: Text('데이터가 없습니다.'));
-    final detail = _festivalDetail!;
+  Widget _buildDetailContent(FestivalPageData data) {
+    final detail = data.detail;
     final allImages = [
       if (detail.firstimage.isNotEmpty) detail.firstimage,
-      ..._images.map((img) => img.originimgurl)
+      ...data.images.map((img) => img.originimgurl)
     ];
+
+    final l10n = AppLocalizations.of(context)!;
+
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -178,8 +213,12 @@ class _DetailPageState extends State<DetailPage> {
             height: 250,
             child: Swiper(
               itemCount: allImages.length,
+              loop: false,
+              viewportFraction: 1.0,
+              scale: 1.0,
               itemBuilder: (context, index) {
                 return CachedNetworkImage(
+                  cacheManager: customCacheManager,
                   imageUrl: allImages[index],
                   fit: BoxFit.cover,
                   placeholder: (context, url) =>
@@ -209,38 +248,35 @@ class _DetailPageState extends State<DetailPage> {
                         .replaceAll(RegExp('<[^>]*>'), ''),
                     style: Theme.of(context).textTheme.bodyMedium),
                 const Divider(height: 32),
-                _buildInfoRow(Icons.calendar_today, '행사 기간',
+                _buildInfoRow(Icons.calendar_today, l10n.eventPeriod,
                     '${detail.eventstartdate} ~ ${detail.eventenddate}'),
                 if (detail.playtime.isNotEmpty)
-                  _buildInfoRow(Icons.access_time, '공연 시간', detail.playtime),
+                  _buildInfoRow(
+                      Icons.access_time, l10n.performanceTime, detail.playtime),
                 if (detail.usetimefestival.isNotEmpty)
-                  _buildInfoRow(Icons.payment, '이용 요금', detail.usetimefestival),
+                  _buildInfoRow(
+                      Icons.payment, l10n.usageFee, detail.usetimefestival),
                 if (detail.tel.isNotEmpty)
-                  _buildInfoRow(Icons.phone, '전화번호', detail.tel),
+                  _buildInfoRow(Icons.phone, l10n.phoneNumber, detail.tel),
                 const SizedBox(height: 24),
-                Text('오시는 길', style: Theme.of(context).textTheme.titleLarge),
+                Text(l10n.directions,
+                    style: Theme.of(context).textTheme.titleLarge),
                 const SizedBox(height: 8),
                 TranslatedText(text: detail.addr1),
                 const SizedBox(height: 16),
-                _festivalLocation != null
-                    ? SizedBox(
-                        height: 200,
-                        child: GoogleMap(
-                          initialCameraPosition: CameraPosition(
-                              target: _festivalLocation!, zoom: 15),
-                          markers: _markers,
-                        ),
-                      )
+                data.location != null
+                    ? StaticFestivalMap(
+                        location: data.location!, markers: data.markers)
                     : Container(
                         height: 200,
                         alignment: Alignment.center,
                         color: Colors.grey[200],
-                        child: const Text('지도 정보를 제공하지 않습니다.'),
+                        child: Text(l10n.mapNotAvailable),
                       ),
                 const SizedBox(height: 16),
                 ElevatedButton(
                     onPressed: () => _showDirectionsDialog(context, detail),
-                    child: const Text('길찾기')),
+                    child: Text(l10n.getDirections)),
               ],
             ),
           ),
@@ -278,16 +314,17 @@ class _DetailPageState extends State<DetailPage> {
 
   Future<void> _showDirectionsDialog(
       BuildContext context, FestivalDetail destination) async {
+    final l10n = AppLocalizations.of(context)!;
     if (destination.mapx == '0.0' || destination.mapy == '0.0') {
       showDialog(
           context: context,
           builder: (context) => AlertDialog(
-                title: const Text('알림'),
-                content: const Text('이 장소는 길찾기를 지원하지 않습니다.'),
+                title: Text(l10n.notification),
+                content: Text(l10n.unsupportedDirections),
                 actions: [
                   TextButton(
                       onPressed: () => Navigator.of(context).pop(),
-                      child: const Text('확인'))
+                      child: Text(l10n.ok))
                 ],
               ));
       return;
@@ -296,14 +333,14 @@ class _DetailPageState extends State<DetailPage> {
     final String? mapType = await showDialog<String>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('어떤 지도로 길을 찾으시겠어요?'),
+        title: Text(l10n.askWhichMap),
         content: TranslatedText(text: destination.title),
         actions: [
           TextButton(
-              child: const Text('카카오맵'),
+              child: Text(l10n.kakaoMap),
               onPressed: () => Navigator.of(dialogContext).pop('kakao')),
           TextButton(
-              child: const Text('구글맵'),
+              child: Text(l10n.googleMap),
               onPressed: () => Navigator.of(dialogContext).pop('google')),
         ],
       ),
@@ -320,41 +357,61 @@ class _DetailPageState extends State<DetailPage> {
 
   Future<void> _launchGoogleMapsDirections(String lat, String lng) async {
     if (!mounted) return;
+    final l10n = AppLocalizations.of(context)!;
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
-      if (mounted)
-        ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text('위치 서비스를 활성화해주세요.')));
-      return;
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(l10n.locationServiceDisabled)));
+        return;
+      }
     }
+
     LocationPermission permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
-        if (mounted)
-          ScaffoldMessenger.of(context)
-              .showSnackBar(const SnackBar(content: Text('위치 권한이 거부되었습니다.')));
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(l10n.locationPermissionDenied)));
+        }
         return;
       }
     }
     if (permission == LocationPermission.deniedForever) {
-      if (mounted)
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            content: Text('위치 권한이 영구적으로 거부되었습니다. 앱 설정에서 권한을 허용해주세요.')));
-      return;
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(l10n.locationPermissionPermanentlyDenied)));
+        return;
+      }
     }
 
-    final position = await Geolocator.getCurrentPosition();
-    if (!mounted) return;
+    try {
+      await Future.delayed(const Duration(milliseconds: 500));
+      final position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      ).timeout(const Duration(seconds: 10));
+      print('Current Position: ${position.latitude}, ${position.longitude}');
 
-    final url = Uri.parse(
-        'https://www.google.com/maps/dir/?api=1&origin=${position.latitude},${position.longitude}&destination=$lat,$lng');
-    if (await canLaunchUrl(url)) {
-      await launchUrl(url);
-    } else {
-      if (mounted)
+      if (!mounted) return;
+      final currentLang = AppLocalizations.of(context)!.localeName;
+
+      final url = Uri.parse(
+          'https://www.google.com/maps/dir/?api=1&origin=${position.latitude},${position.longitude}&destination=$lat,$lng');
+      if (await canLaunchUrl(url)) {
+        await launchUrl(url);
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(l10n.couldNotLaunchGoogleMaps)));
+        }
+      }
+    } catch (e) {
+      print('Failed to get position: $e');
+      if (mounted) {
         ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text('구글 맵을 열 수 없습니다.')));
+            .showSnackBar(SnackBar(content: Text(l10n.couldNotGetLocation)));
+      }
     }
   }
 }

@@ -1,5 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:project/provider/auth_provider.dart';
+import 'package:project/user/simple_join.dart';
 import 'package:provider/provider.dart';
 import '../api_client.dart';
 import '../provider/auth_provider.dart';
@@ -26,8 +28,6 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
-  // LoginPage.dart 안에
-
   Future<void> _performLogin() async {
     final authProvider = context.read<AuthProvider>();
     final l10n = AppLocalizations.of(context)!;
@@ -39,9 +39,7 @@ class _LoginPageState extends State<LoginPage> {
           title: l10n.inputError, content: l10n.errorEnterAllFields);
       return;
     }
-
     setState(() => _isLoading = true);
-
     try {
       // 1. ApiClient를 사용하여 로그인 API 호출 (이 부분은 이전과 동일)
       final response = await apiClient.postForm('api/login', {
@@ -117,15 +115,15 @@ class _LoginPageState extends State<LoginPage> {
 
       else if (uri.path == '/simplejoin') {
         final email = uri.queryParameters['email'];
-        final name = uri.queryParameters['name'];
+        final username = uri.queryParameters['username'];
 
         print("신규 회원입니다. 회원가입 페이지로 이동합니다.");
-        print("이메일: $email, 이름: $name");
-
-        // Navigator.of(context).push(MaterialPageRoute(
-        //   builder: (_) => SignUpPage(email: email, name: name),
-        // ));
-
+        print("이메일: $email, 이름: $username");
+        if(email != null && username != null){
+          Navigator.of(context).push(MaterialPageRoute(
+            builder: (_) => SimpleJoin(email: email, username: username),
+          ));
+        }
       }
       // [시나리오 3] 예상치 못한 경로
       else {
@@ -207,8 +205,10 @@ class _LoginPageState extends State<LoginPage> {
             ),
             const SizedBox(height: 24),
             TextButton(
-              onPressed: () => Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => const JoinPage())),
+              onPressed: () =>
+                  Navigator.push(context,
+                      MaterialPageRoute(
+                          builder: (context) => const JoinPage())),
               child: Text(l10n.createNewAccount,
                   style: const TextStyle(color: Colors.white)),
             ),

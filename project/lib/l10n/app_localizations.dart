@@ -319,6 +319,114 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'해당 날짜에 예정된 축제가 없습니다.'**
   String get calendarComment;
+
+  /// No description provided for @eventPeriod.
+  ///
+  /// In ko, this message translates to:
+  /// **'행사 기간'**
+  String get eventPeriod;
+
+  /// No description provided for @performanceTime.
+  ///
+  /// In ko, this message translates to:
+  /// **'공연 시간'**
+  String get performanceTime;
+
+  /// No description provided for @usageFee.
+  ///
+  /// In ko, this message translates to:
+  /// **'이용 요금'**
+  String get usageFee;
+
+  /// No description provided for @phoneNumber.
+  ///
+  /// In ko, this message translates to:
+  /// **'전화번호'**
+  String get phoneNumber;
+
+  /// No description provided for @directions.
+  ///
+  /// In ko, this message translates to:
+  /// **'오시는 길'**
+  String get directions;
+
+  /// No description provided for @getDirections.
+  ///
+  /// In ko, this message translates to:
+  /// **'길찾기'**
+  String get getDirections;
+
+  /// No description provided for @askWhichMap.
+  ///
+  /// In ko, this message translates to:
+  /// **'어떤 지도로 길을 찾으시겠어요?'**
+  String get askWhichMap;
+
+  /// No description provided for @kakaoMap.
+  ///
+  /// In ko, this message translates to:
+  /// **'카카오맵'**
+  String get kakaoMap;
+
+  /// No description provided for @googleMap.
+  ///
+  /// In ko, this message translates to:
+  /// **'구글맵'**
+  String get googleMap;
+
+  /// No description provided for @notification.
+  ///
+  /// In ko, this message translates to:
+  /// **'알림'**
+  String get notification;
+
+  /// No description provided for @ok.
+  ///
+  /// In ko, this message translates to:
+  /// **'확인'**
+  String get ok;
+
+  /// No description provided for @unsupportedDirections.
+  ///
+  /// In ko, this message translates to:
+  /// **'이 장소는 길찾기를 지원하지 않습니다.'**
+  String get unsupportedDirections;
+
+  /// No description provided for @mapNotAvailable.
+  ///
+  /// In ko, this message translates to:
+  /// **'지도 정보를 제공하지 않습니다.'**
+  String get mapNotAvailable;
+
+  /// No description provided for @locationServiceDisabled.
+  ///
+  /// In ko, this message translates to:
+  /// **'위치 서비스를 활성화해주세요.'**
+  String get locationServiceDisabled;
+
+  /// No description provided for @locationPermissionDenied.
+  ///
+  /// In ko, this message translates to:
+  /// **'위치 권한이 거부되었습니다.'**
+  String get locationPermissionDenied;
+
+  /// No description provided for @locationPermissionPermanentlyDenied.
+  ///
+  /// In ko, this message translates to:
+  /// **'위치 권한이 영구적으로 거부되었습니다. 앱 설정에서 권한을 허용해주세요.'**
+  String get locationPermissionPermanentlyDenied;
+
+  /// No description provided for @couldNotLaunchGoogleMaps.
+  ///
+  /// In ko, this message translates to:
+  /// **'구글 맵을 열 수 없습니다.'**
+  String get couldNotLaunchGoogleMaps;
+
+  /// No description provided for @couldNotGetLocation.
+  ///
+  /// In ko, this message translates to:
+  /// **'현재 위치를 가져올 수 없습니다.'**
+  String get couldNotGetLocation;
 }
 
 class _AppLocalizationsDelegate
