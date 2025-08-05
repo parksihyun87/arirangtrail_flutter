@@ -122,6 +122,36 @@ abstract class AppLocalizations {
   /// **'캘린더'**
   String get calendar;
 
+  /// No description provided for @chatRoom.
+  ///
+  /// In ko, this message translates to:
+  /// **'채팅방'**
+  String get chatRoom;
+
+  /// No description provided for @chatRoomList.
+  ///
+  /// In ko, this message translates to:
+  /// **'채팅방 목록'**
+  String get chatRoomList;
+
+  /// No description provided for @chatRoomCreator.
+  ///
+  /// In ko, this message translates to:
+  /// **'방장'**
+  String get chatRoomCreator;
+
+  /// No description provided for @chatMessage.
+  ///
+  /// In ko, this message translates to:
+  /// **'참여 가능한 채팅방이 없습니다'**
+  String get chatMessage;
+
+  /// No description provided for @chatHintText.
+  ///
+  /// In ko, this message translates to:
+  /// **'메시지를 입력하세요...'**
+  String get chatHintText;
+
   /// No description provided for @home.
   ///
   /// In ko, this message translates to:
@@ -223,6 +253,18 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'회원가입 실패'**
   String get joinFailed;
+
+  /// No description provided for @loginNeed.
+  ///
+  /// In ko, this message translates to:
+  /// **'로그인이 필요합니다.'**
+  String get loginNeed;
+
+  /// No description provided for @loginComment.
+  ///
+  /// In ko, this message translates to:
+  /// **'로그인 후 이용 가능한 서비스입니다.'**
+  String get loginComment;
 
   /// No description provided for @confirm.
   ///

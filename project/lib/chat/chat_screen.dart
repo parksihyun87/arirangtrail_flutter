@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:project/widget/translator.dart';
 import 'package:provider/provider.dart';
+import '../l10n/app_localizations.dart';
 import '../provider/auth_provider.dart';
 import 'chat_model.dart';
 import 'chat_api_service.dart';
@@ -9,7 +11,8 @@ class ChatScreen extends StatefulWidget {
   final int roomId;
   final String roomName;
 
-  const ChatScreen({Key? key, required this.roomId, required this.roomName}) : super(key: key);
+  const ChatScreen({Key? key, required this.roomId, required this.roomName})
+      : super(key: key);
 
   @override
   State<ChatScreen> createState() => _ChatScreenState();
@@ -56,9 +59,12 @@ class _ChatScreenState extends State<ChatScreen> {
       // ✨ 바로 여기에 stream.listen 코드가 위치합니다.
       _chatService.messageStream.listen((newMessage) {
         if (mounted) {
-          setState(() { _messages.insert(0, newMessage); });
+          setState(() {
+            _messages.insert(0, newMessage);
+          });
           // ✨ 새 메시지를 받을 때마다 _lastReadSeq를 조용히 업데이트만 합니다.
-          if (newMessage.messageSeq != null && newMessage.messageSeq! > _lastReadSeq) {
+          if (newMessage.messageSeq != null &&
+              newMessage.messageSeq! > _lastReadSeq) {
             _lastReadSeq = newMessage.messageSeq!;
           }
         }
@@ -66,7 +72,6 @@ class _ChatScreenState extends State<ChatScreen> {
 
       // --- 4. 과거 데이터 로딩 ---
       _fetchChatHistory();
-
     } else {
       // 토큰이 없을 경우 (비정상적인 접근)
       print('오류: 토큰이 없어서 채팅 서비스에 연결할 수 없습니다.');
@@ -97,17 +102,19 @@ class _ChatScreenState extends State<ChatScreen> {
         });
       }
     } catch (e) {
-      setState(() { _isLoadingHistory = false; });
+      setState(() {
+        _isLoadingHistory = false;
+      });
       print('과거 메시지 로딩 실패: $e');
     }
   }
-
 
   // ✨ 이 함수는 이제 dispose에서만 사용됩니다.
   void _updateReadStatus() {
     if (_lastReadSeq > 0) {
       print(">>>>> 퇴장 시 읽음 처리: Room ${widget.roomId}, Seq $_lastReadSeq");
-      ChatApiService.updateLastReadSequence(widget.roomId, myUserId, _lastReadSeq);
+      ChatApiService.updateLastReadSequence(
+          widget.roomId, myUserId, _lastReadSeq);
     }
   }
 
@@ -129,44 +136,48 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(title: Text(widget.roomName)),
+      appBar: AppBar(
+        title: TranslatedText(text: widget.roomName),
+        centerTitle: true,
+      ),
       body: Column(
         children: [
           Expanded(
             child: _isLoadingHistory
                 ? const Center(child: CircularProgressIndicator())
                 : ListView.builder(
-              reverse: true,
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              itemCount: _messages.length,
-              itemBuilder: (context, index) {
-                final message = _messages[index];
-                // DTO에 sender ID가 있다고 가정하고, 나의 ID와 비교
-                final isMe = message.sender == myUserId;
-                // 타입에 따라 다른 위젯을 보여주는 로직 (이전 답변과 동일)
-                switch (message.type) {
-                  case MessageType.TALK:
-                  case MessageType.IMAGE:
-                    return _buildTalkBubble(message, isMe: isMe);
-                  case MessageType.ENTER:
-                  case MessageType.LEAVE:
-                    return _buildSystemMessage(message.message);
-                  default:
-                    return const SizedBox.shrink();
-                }
-              },
-            ),
+                    reverse: true,
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    itemCount: _messages.length,
+                    itemBuilder: (context, index) {
+                      final message = _messages[index];
+                      // DTO에 sender ID가 있다고 가정하고, 나의 ID와 비교
+                      final isMe = message.sender == myUserId;
+                      // 타입에 따라 다른 위젯을 보여주는 로직 (이전 답변과 동일)
+                      switch (message.type) {
+                        case MessageType.TALK:
+                        case MessageType.IMAGE:
+                          return _buildTalkBubble(message, isMe: isMe);
+                        case MessageType.ENTER:
+                        case MessageType.LEAVE:
+                          return _buildSystemMessage(message);
+                        default:
+                          return const SizedBox.shrink();
+                      }
+                    },
+                  ),
           ),
           // 메시지 입력창 UI
-          _buildMessageComposer(),
+          _buildMessageComposer(l10n),
         ],
       ),
     );
   }
 
   // 메시지 입력 위젯
-  Widget _buildMessageComposer() {
+  Widget _buildMessageComposer(AppLocalizations l10n) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8.0),
       color: Colors.white,
@@ -175,7 +186,9 @@ class _ChatScreenState extends State<ChatScreen> {
           Expanded(
             child: TextField(
               controller: _textController,
-              decoration: const InputDecoration.collapsed(hintText: '메시지를 입력하세요...'),
+              decoration: InputDecoration.collapsed(
+                hintText: l10n.chatHintText,
+              ),
             ),
           ),
           IconButton(
@@ -188,8 +201,7 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   // 아래는 UI를 그리는 위젯들 (이전 답변과 동일, 필요 시 isMe 로직만 추가)
-  Widget _buildSystemMessage(String message) {
-    // ✨✨✨ 이 부분을 채워넣습니다. ✨✨✨
+  Widget _buildSystemMessage(ChatMessage message) {
     return Center(
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 8.0),
@@ -198,13 +210,14 @@ class _ChatScreenState extends State<ChatScreen> {
           color: Colors.grey[300],
           borderRadius: BorderRadius.circular(12),
         ),
-        child: Text(message, style: const TextStyle(fontSize: 12)),
+        child: TranslatedText(
+            text: message.message, style: const TextStyle(fontSize: 12)),
       ),
     );
   }
+
   // 일반 대화 메시지를 위한 말풍선 위젯
   Widget _buildTalkBubble(ChatMessage message, {required bool isMe}) {
-    // ✨✨✨ 이 부분을 채워넣습니다. ✨✨✨
     return Padding(
       padding: EdgeInsets.only(
         left: isMe ? 64.0 : 16.0,
@@ -213,9 +226,14 @@ class _ChatScreenState extends State<ChatScreen> {
         bottom: 8,
       ),
       child: Column(
-        crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+        crossAxisAlignment:
+            isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
         children: [
-          if (!isMe) Text(message.nickname ?? '알수없음', style: const TextStyle(fontSize: 12, color: Colors.grey)),
+          if (!isMe)
+            TranslatedText(
+              text: message.nickname ?? '알수없음',
+              style: const TextStyle(fontSize: 12, color: Colors.grey),
+            ),
           const SizedBox(height: 4),
           Container(
             padding: const EdgeInsets.all(12),
@@ -225,7 +243,7 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
             child: message.type == MessageType.IMAGE
                 ? Image.network(message.message)
-                : Text(message.message),
+                : TranslatedText(text: message.message),
           ),
         ],
       ),

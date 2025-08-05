@@ -21,6 +21,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get calendar => 'Calendar';
 
   @override
+  String get chatRoom => 'Chat';
+
+  @override
+  String get chatRoomList => 'Chat room list';
+
+  @override
+  String get chatRoomCreator => 'Creator';
+
+  @override
+  String get chatMessage => 'There are no chat rooms available';
+
+  @override
+  String get chatHintText => 'Enter a message...';
+
+  @override
   String get home => 'Home';
 
   @override
@@ -72,6 +87,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get joinFailed => 'Sign Up Failed';
+
+  @override
+  String get loginNeed => 'You need to log in.';
+
+  @override
+  String get loginComment => 'It is a service that you can use after login.';
 
   @override
   String get confirm => 'Confirm';

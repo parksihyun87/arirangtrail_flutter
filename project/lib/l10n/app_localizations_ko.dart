@@ -21,6 +21,21 @@ class AppLocalizationsKo extends AppLocalizations {
   String get calendar => '캘린더';
 
   @override
+  String get chatRoom => '채팅방';
+
+  @override
+  String get chatRoomList => '채팅방 목록';
+
+  @override
+  String get chatRoomCreator => '방장';
+
+  @override
+  String get chatMessage => '참여 가능한 채팅방이 없습니다';
+
+  @override
+  String get chatHintText => '메시지를 입력하세요...';
+
+  @override
   String get home => '홈';
 
   @override
@@ -72,6 +87,12 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get joinFailed => '회원가입 실패';
+
+  @override
+  String get loginNeed => '로그인이 필요합니다.';
+
+  @override
+  String get loginComment => '로그인 후 이용 가능한 서비스입니다.';
 
   @override
   String get confirm => '확인';
