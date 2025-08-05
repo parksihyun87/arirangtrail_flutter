@@ -23,9 +23,9 @@ class ChatService {
   // 1. 연결 및 인증
   void connect() {
     // 배포시
-    // final wsUrl = dotenv.env['PROD_WS_FLUTTER_URL'];
+    final wsUrl = dotenv.env['PROD_WS_FLUTTER_URL'];
     // 로컬시
-    final wsUrl = dotenv.env['DEV_WS_FLUTTER_URL'];
+    // final wsUrl = dotenv.env['DEV_WS_FLUTTER_URL'];
 
     if (wsUrl == null) {
       print("PROD_WS_FLUTTER_URL을 .env 파일에서 찾을 수 없습니다.");

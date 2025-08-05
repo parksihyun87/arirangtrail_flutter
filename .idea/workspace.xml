@@ -5,22 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="a5fbd55e-8660-481d-883c-3a2ea78cef04" name="Changes" comment="웹소켓 리이슈 완료">
-      <change afterPath="$PROJECT_DIR$/project/lib/widget/festival_map.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/android/app/src/main/AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/project/android/app/src/main/AndroidManifest.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/lib/detail_page.dart" beforeDir="false" afterPath="$PROJECT_DIR$/project/lib/detail_page.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/lib/l10n/app_en.arb" beforeDir="false" afterPath="$PROJECT_DIR$/project/lib/l10n/app_en.arb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/lib/l10n/app_ko.arb" beforeDir="false" afterPath="$PROJECT_DIR$/project/lib/l10n/app_ko.arb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/lib/l10n/app_localizations.dart" beforeDir="false" afterPath="$PROJECT_DIR$/project/lib/l10n/app_localizations.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/lib/l10n/app_localizations_en.dart" beforeDir="false" afterPath="$PROJECT_DIR$/project/lib/l10n/app_localizations_en.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/lib/l10n/app_localizations_ko.dart" beforeDir="false" afterPath="$PROJECT_DIR$/project/lib/l10n/app_localizations_ko.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/lib/main.dart" beforeDir="false" afterPath="$PROJECT_DIR$/project/lib/main.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/lib/navigation_drawer.dart" beforeDir="false" afterPath="$PROJECT_DIR$/project/lib/navigation_drawer.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/lib/user/login_page.dart" beforeDir="false" afterPath="$PROJECT_DIR$/project/lib/user/login_page.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/lib/user/simple_join.dart" beforeDir="false" afterPath="$PROJECT_DIR$/project/lib/user/simple_join.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/pubspec.lock" beforeDir="false" afterPath="$PROJECT_DIR$/project/pubspec.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/pubspec.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/project/pubspec.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/project/lib/api_client.dart" beforeDir="false" afterPath="$PROJECT_DIR$/project/lib/api_client.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/project/lib/chat/chat_api_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/project/lib/chat/chat_api_service.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/project/lib/chat/chat_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/project/lib/chat/chat_service.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/project/lib/chat/lobby_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/project/lib/chat/lobby_service.dart" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -75,7 +64,7 @@
     "cidr.known.project.marker": "true",
     "com.google.services.firebase.aqiPopupShown": "true",
     "dart.analysis.tool.window.visible": "false",
-    "git-widget-placeholder": "Merging dev__sihyun",
+    "git-widget-placeholder": "dev__sihyun",
     "io.flutter.reload.alreadyRun": "true",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "C:/Users/803-07/Desktop/flutter/project/lib/backup",
