@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:project/provider/auth_provider.dart';
-import 'package:project/review_page.dart';
 import 'package:project/widget/translator.dart';
 import 'package:provider/provider.dart';
 import 'calendar_page.dart';
@@ -58,36 +57,46 @@ class CustomDrawer extends StatelessWidget {
             },
           ),
           ListTile(
-            leading: const Icon(Icons.reviews_outlined),
-            title: const Text('축제후기'),
+            leading: const Icon(Icons.chat_bubble_outline), // 채팅 아이콘
+            title: Text(l10n.chatRoom),
             onTap: () {
-              Navigator.pop(context);
-              Navigator.push(
+              // authProvider를 통해 로그인 상태를 확인합니다.
+              if (authProvider.isLoggedIn) {
+                // --- 1. 로그인한 사용자일 경우 ---
+                // 기존처럼 Drawer를 닫고 채팅방 목록 화면으로 이동합니다.
+                Navigator.pop(context); // Drawer 닫기
+                Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => const ReviewPage()));
+                    builder: (context) => const ChatRoomListScreen(),
+                  ),
+                );
+              } else {
+                // --- 2. 로그인하지 않은 사용자일 경우 ---
+                // 안내 다이얼로그(AlertDialog)를 띄웁니다.
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    // AlertDialog 위젯을 반환합니다.
+                    return AlertDialog(
+                      title: Text(l10n.loginNeed), // 다이얼로그 제목
+                      content: Text(l10n.loginComment), // 다이얼로그 내용
+                      actions: <Widget>[
+                        // '확인' 버튼
+                        TextButton(
+                          child: Text(l10n.confirm),
+                          onPressed: () {
+                            // 다이얼로그를 닫습니다.
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                );
+              }
             },
           ),
-          // 로그인한 사용자에게만 채팅방 메뉴가 보이도록 합니다.
-            ListTile(
-              leading: const Icon(Icons.chat_bubble_outline), // 채팅 아이콘
-              title: const Text('채팅방 (로그인 후 이용)'), // 메뉴 이름
-              onTap: () {}
-            ),
-          if (authProvider.isLoggedIn)
-            ListTile(
-              leading: const Icon(Icons.chat_bubble_outline), // 채팅 아이콘
-              title: const Text('채팅방'), // 메뉴 이름
-              onTap: () {
-                // 1. 현재 열려있는 Drawer를 닫습니다.
-                Navigator.pop(context);
-                // 2. ChatRoomListScreen으로 이동합니다.
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const ChatRoomListScreen()));
-              },
-            ),
           const Divider(),
           if (authProvider.isLoggedIn) ...[
             ListTile(
