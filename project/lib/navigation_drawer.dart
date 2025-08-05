@@ -4,6 +4,7 @@ import 'package:project/review_page.dart';
 import 'package:project/widget/translator.dart';
 import 'package:provider/provider.dart';
 import 'calendar_page.dart';
+import 'chat/chat_room_list_screen.dart';
 import 'l10n/app_localizations.dart';
 import './user/login_page.dart';
 
@@ -67,6 +68,26 @@ class CustomDrawer extends StatelessWidget {
                       builder: (context) => const ReviewPage()));
             },
           ),
+          // 로그인한 사용자에게만 채팅방 메뉴가 보이도록 합니다.
+            ListTile(
+              leading: const Icon(Icons.chat_bubble_outline), // 채팅 아이콘
+              title: const Text('채팅방 (로그인 후 이용)'), // 메뉴 이름
+              onTap: () {}
+            ),
+          if (authProvider.isLoggedIn)
+            ListTile(
+              leading: const Icon(Icons.chat_bubble_outline), // 채팅 아이콘
+              title: const Text('채팅방'), // 메뉴 이름
+              onTap: () {
+                // 1. 현재 열려있는 Drawer를 닫습니다.
+                Navigator.pop(context);
+                // 2. ChatRoomListScreen으로 이동합니다.
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const ChatRoomListScreen()));
+              },
+            ),
           const Divider(),
           if (authProvider.isLoggedIn) ...[
             ListTile(

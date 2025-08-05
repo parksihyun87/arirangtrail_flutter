@@ -4,6 +4,7 @@ import 'package:project/provider/auth_provider.dart';
 import 'package:project/user/simple_join.dart';
 import 'package:provider/provider.dart';
 import '../api_client.dart';
+import '../provider/auth_provider.dart';
 import 'join_page.dart';
 import '../l10n/app_localizations.dart';
 import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
@@ -16,7 +17,6 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final ApiClient _apiClient = ApiClient();
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isLoading = false;
@@ -29,6 +29,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> _performLogin() async {
+    final authProvider = context.read<AuthProvider>();
     final l10n = AppLocalizations.of(context)!;
     final username = _usernameController.text;
     final password = _passwordController.text;
@@ -40,35 +41,55 @@ class _LoginPageState extends State<LoginPage> {
     }
     setState(() => _isLoading = true);
     try {
-      final response = await _apiClient
-          .postForm('api/login', {'username': username, 'password': password});
+      // 1. ApiClient를 사용하여 로그인 API 호출 (이 부분은 이전과 동일)
+      final response = await apiClient.postForm('api/login', {
+        'username': username,
+        'password': password
+      });
+
       if (response.statusCode == 200) {
         final responseData = jsonDecode(utf8.decode(response.bodyBytes));
-        final token =
-            response.headers['authorization'] ?? responseData['accessToken'];
-        if (token == null) throw Exception('로그인에 성공했지만 토큰을 받지 못했습니다.');
-        final userProfile = UserProfile(
-          username: responseData['username'] ?? username,
-          nickname: responseData['nickname'] ?? '여행자 $username',
-          imageUrl: responseData['imageUrl'] ?? 'assets/person.png',
-        );
+        final accessToken = response.headers['authorization'];
+
+        // 2. Refresh Token 파싱
+        String? refreshToken;
+        final setCookieHeader = response.headers['set-cookie'];
+        if (setCookieHeader != null) {
+          final cookie = setCookieHeader.split(';').firstWhere((c) => c.trim().startsWith('refresh='));
+          refreshToken = cookie.split('=').last;
+        }
+
+        if (accessToken == null || refreshToken == null) {
+          throw Exception('서버로부터 토큰 정보를 받지 못했습니다.');
+        }
+
+        // ✨ 3. 서버가 보내준 expiresIn 값을 추출
+        final int expiresIn = responseData['expiresIn'];
+
+        final userProfile = UserProfile.fromJson(responseData);
+
         if (mounted) {
-          context.read<AuthProvider>().login(userProfile, token);
+          // ✨ 4. AuthProvider.login에 expiresIn 값을 추가로 전달
+          await authProvider.login(userProfile, accessToken, refreshToken, expiresIn);
+
           _showResultDialog(
               title: l10n.loginSuccess,
               content: l10n.welcomeMessage(userProfile.nickname),
-              onConfirm: () => Navigator.of(context).pop());
+              onConfirm: () => Navigator.of(context).popUntil((route) => route.isFirst)
+          );
         }
       } else {
         final errorData = jsonDecode(utf8.decode(response.bodyBytes));
-        throw Exception(errorData['message'] ?? '아이디 또는 비밀번호를 확인해주세요.');
+        throw Exception(errorData['error'] ?? '알 수 없는 오류가 발생했습니다.');
       }
     } catch (e) {
       _showResultDialog(
           title: l10n.loginFailed,
           content: e.toString().replaceAll('Exception: ', ''));
     } finally {
-      if (mounted) setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
@@ -77,8 +98,7 @@ class _LoginPageState extends State<LoginPage> {
     setState(() => _isLoading = true);
     try {
       final url = Uri.parse(
-          'http://arirangtrail.duckdns.org/oauth2/authorization/$provider?client_type=app');
-
+          'http://arirangtrail.duckdns.org/oauth2/authorization/$provider');
       final result = await FlutterWebAuth2.authenticate(
         url: url.toString(),
         callbackUrlScheme: "arirangtrail",
@@ -87,19 +107,7 @@ class _LoginPageState extends State<LoginPage> {
       if (uri.path == '/oauth-callback') {
         final token = uri.queryParameters['code'];
         if (token != null) {
-          try{
-            final response = await _apiClient.postForm("/api/app/login",
-              {'code': token},
-            );
-            if (response.statusCode == 200) {
-              final responseData = jsonDecode(utf8.decode(response.bodyBytes));
-              print(responseData);
-            }
-          }catch(e){
-            print(e.toString());
-          }
-
-
+          print("로그인 성공! 토큰: $token");
         } else {
           throw Exception('로그인 콜백을 받았지만 토큰이 없습니다.');
         }
@@ -121,7 +129,8 @@ class _LoginPageState extends State<LoginPage> {
       else {
         throw Exception('알 수 없는 콜백 URL입니다: $result');
       }
-    } catch (e) {
+
+    }catch(e){
       _showResultDialog(
           title: l10n.loginFailed,
           content: e.toString().replaceAll('Exception: ', ''));
@@ -130,14 +139,14 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  void _showResultDialog({required String title,
-    required String content,
-    VoidCallback? onConfirm}) {
+  void _showResultDialog(
+      {required String title,
+      required String content,
+      VoidCallback? onConfirm}) {
     final l10n = AppLocalizations.of(context)!;
     showDialog(
         context: context,
-        builder: (context) =>
-            AlertDialog(
+        builder: (context) => AlertDialog(
               title: Text(title),
               content: Text(content),
               actions: [

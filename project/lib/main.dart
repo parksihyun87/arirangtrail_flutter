@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_maps_flutter_android/google_maps_flutter_android.dart';
 import 'package:project/provider/auth_provider.dart';
 import 'package:project/provider/locale_provider.dart';
@@ -10,6 +11,7 @@ import 'package:google_maps_flutter_platform_interface/google_maps_flutter_platf
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: ".env");
   await initializeDateFormatting('ko_KR', null);
 
   final GoogleMapsFlutterPlatform mapsImplementation =
