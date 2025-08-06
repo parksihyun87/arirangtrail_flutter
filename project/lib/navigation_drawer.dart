@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:project/provider/auth_provider.dart';
-import 'package:project/widget/translator.dart';
 import 'package:provider/provider.dart';
 import 'calendar_page.dart';
 import 'chat/chat_room_list_screen.dart';
@@ -21,8 +20,8 @@ class CustomDrawer extends StatelessWidget {
         children: <Widget>[
           UserAccountsDrawerHeader(
             accountName: authProvider.isLoggedIn
-                ? TranslatedText(
-                    text: authProvider.userProfile!.nickname,
+                ? Text(
+                    l10n.welcomeMessage(authProvider.userProfile!.nickname),
                     style: const TextStyle(
                         fontSize: 16, fontWeight: FontWeight.bold),
                   )
@@ -106,7 +105,11 @@ class CustomDrawer extends StatelessWidget {
                 Navigator.pop(context);
                 context.read<AuthProvider>().logout();
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(l10n.logoutSuccessMessage)),
+                  SnackBar(
+                      content: Text(
+                    l10n.logoutSuccessMessage,
+                    textAlign: TextAlign.center,
+                  )),
                 );
               },
             ),

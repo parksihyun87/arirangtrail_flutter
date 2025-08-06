@@ -32,6 +32,7 @@
   "loginSuccess": "로그인 성공",
   "joinSuccess": "회원가입 성공",
   "loginFailed": "로그인 실패",
+  "loginFailedMessage": "잘못된 정보입니다. 다시 입력해주세요.",
   "joinFailed": "회원가입 실패",
   "loginNeed": "로그인이 필요합니다.",
   "loginComment": "로그인 후 이용 가능한 서비스입니다.",
