@@ -42,10 +42,8 @@ class _LoginPageState extends State<LoginPage> {
     setState(() => _isLoading = true);
     try {
       // 1. ApiClient를 사용하여 로그인 API 호출 (이 부분은 이전과 동일)
-      final response = await apiClient.postForm('api/login', {
-        'username': username,
-        'password': password
-      });
+      final response = await apiClient
+          .postForm('api/login', {'username': username, 'password': password});
 
       if (response.statusCode == 200) {
         final responseData = jsonDecode(utf8.decode(response.bodyBytes));
@@ -55,7 +53,9 @@ class _LoginPageState extends State<LoginPage> {
         String? refreshToken;
         final setCookieHeader = response.headers['set-cookie'];
         if (setCookieHeader != null) {
-          final cookie = setCookieHeader.split(';').firstWhere((c) => c.trim().startsWith('refresh='));
+          final cookie = setCookieHeader
+              .split(';')
+              .firstWhere((c) => c.trim().startsWith('refresh='));
           refreshToken = cookie.split('=').last;
         }
 
@@ -70,13 +70,14 @@ class _LoginPageState extends State<LoginPage> {
 
         if (mounted) {
           // ✨ 4. AuthProvider.login에 expiresIn 값을 추가로 전달
-          await authProvider.login(userProfile, accessToken, refreshToken, expiresIn);
+          await authProvider.login(
+              userProfile, accessToken, refreshToken, expiresIn);
 
           _showResultDialog(
               title: l10n.loginSuccess,
               content: l10n.welcomeMessage(userProfile.nickname),
-              onConfirm: () => Navigator.of(context).popUntil((route) => route.isFirst)
-          );
+              onConfirm: () =>
+                  Navigator.of(context).popUntil((route) => route.isFirst));
         }
       } else {
         final errorData = jsonDecode(utf8.decode(response.bodyBytes));
@@ -85,7 +86,7 @@ class _LoginPageState extends State<LoginPage> {
     } catch (e) {
       _showResultDialog(
           title: l10n.loginFailed,
-          content: e.toString().replaceAll('Exception: ', ''));
+          content: l10n.loginFailedMessage);
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);
@@ -185,11 +186,11 @@ class _LoginPageState extends State<LoginPage> {
       else {
         throw Exception('알 수 없는 콜백 URL입니다: $result');
       }
-
-    }catch(e){
+    } catch (e) {
       _showResultDialog(
-          title: l10n.loginFailed,
-          content: e.toString().replaceAll('Exception: ', ''));
+        title: l10n.loginFailed,
+        content: l10n.loginFailedMessage,
+      );
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -261,10 +262,8 @@ class _LoginPageState extends State<LoginPage> {
             ),
             const SizedBox(height: 24),
             TextButton(
-              onPressed: () =>
-                  Navigator.push(context,
-                      MaterialPageRoute(
-                          builder: (context) => const JoinPage())),
+              onPressed: () => Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => const JoinPage())),
               child: Text(l10n.createNewAccount,
                   style: const TextStyle(color: Colors.white)),
             ),
@@ -305,7 +304,7 @@ class _LoginPageState extends State<LoginPage> {
           ),
         );
       case 'naver':
-      // ClipRRect로 감싸서 둥근 모서리를 적용합니다.
+        // ClipRRect로 감싸서 둥근 모서리를 적용합니다.
         return ClipRRect(
           borderRadius: borderRadius,
           child: SizedBox(
@@ -322,7 +321,7 @@ class _LoginPageState extends State<LoginPage> {
           ),
         );
       case 'kakao':
-      // 카카오 버튼에도 동일하게 적용합니다.
+        // 카카오 버튼에도 동일하게 적용합니다.
         return ClipRRect(
           borderRadius: borderRadius,
           child: SizedBox(

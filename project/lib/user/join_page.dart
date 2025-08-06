@@ -97,7 +97,23 @@ class _JoinPageState extends State<JoinPage> {
   }
 
   Future<void> _selectDate() async {
-    /* ... 데이트 피커 로직 ... */
+    final l10n = AppLocalizations.of(context)!;
+
+    final DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: DateTime(2000, 1, 1),
+      firstDate: DateTime(1900),
+      lastDate: DateTime.now(),
+      helpText: l10n.birthdate,
+      confirmText: l10n.confirm,
+    );
+
+    if (pickedDate != null) {
+      setState(() {
+        _birthdateController.text =
+            pickedDate.toIso8601String().split('T')[0]; // YYYY-MM-DD 형식
+      });
+    }
   }
 
   @override

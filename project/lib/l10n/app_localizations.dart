@@ -248,6 +248,12 @@ abstract class AppLocalizations {
   /// **'로그인 실패'**
   String get loginFailed;
 
+  /// No description provided for @loginFailedMessage.
+  ///
+  /// In ko, this message translates to:
+  /// **'잘못된 정보입니다. 다시 입력해주세요.'**
+  String get loginFailedMessage;
+
   /// No description provided for @joinFailed.
   ///
   /// In ko, this message translates to:
