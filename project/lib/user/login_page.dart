@@ -98,22 +98,78 @@ class _LoginPageState extends State<LoginPage> {
     setState(() => _isLoading = true);
     try {
       final url = Uri.parse(
-          'http://arirangtrail.duckdns.org/oauth2/authorization/$provider');
+          'http://arirangtrail.duckdns.org/oauth2/authorization/$provider?state=client_type=app');
       final result = await FlutterWebAuth2.authenticate(
         url: url.toString(),
         callbackUrlScheme: "arirangtrail",
       );
       final uri = Uri.parse(result);
-      if (uri.path == '/oauth-callback') {
-        final token = uri.queryParameters['code'];
-        if (token != null) {
-          print("로그인 성공! 토큰: $token");
+      if (uri.host == 'oauth-callback') {
+        final code = uri.queryParameters['code']; // 변수명을 token에서 code로 변경하여 명확화
+        if (code != null) {
+          print("로그인 콜백 수신! 인증 코드: $code");
+          try {
+            final response = await apiClient.post(
+              'api/app/login',
+              {'code': code},
+            );
+
+            // ✨ 서버로부터 200 OK 응답을 받았을 때 처리 로직
+            if (response.statusCode == 200) {
+              // 1. 응답 본문을 JSON 객체로 디코딩
+              final responseData = jsonDecode(utf8.decode(response.bodyBytes));
+
+              // 2. AuthProvider 인스턴스 가져오기
+              // BuildContext가 사용 가능한 위치여야 합니다.
+              // 사용 불가능한 경우, Provider를 다른 방식으로 가져와야 합니다.
+              final authProvider = Provider.of<AuthProvider>(context, listen: false);
+
+              // 3. 응답 데이터에서 정보 추출
+              final userProfileData = responseData['userProfile'];
+              final accessToken = responseData['accessToken'];
+              final refreshToken = responseData['refreshToken'];
+              final expiresIn = responseData['expiresIn']; // 초 단위 만료 시간
+
+              // 4. 데이터 유효성 검사
+              if (userProfileData == null || accessToken == null || refreshToken == null || expiresIn == null) {
+                throw Exception('서버 응답에 필수 데이터가 누락되었습니다.');
+              }
+
+              // 5. UserProfile 객체 생성
+              final userProfile = UserProfile.fromJson(userProfileData);
+
+              // 6. AuthProvider의 login 메서드 호출하여 상태 업데이트 및 저장
+              await authProvider.login(
+                userProfile,
+                accessToken,
+                refreshToken,
+                expiresIn,
+              );
+
+              print("✅ 로그인 성공 및 AuthProvider 상태 업데이트 완료!");
+              // (옵션) 로그인 성공 후 홈 화면 등 다른 화면으로 이동
+              _showResultDialog(
+                  title: l10n.loginSuccess,
+                  content: l10n.welcomeMessage(userProfile.nickname),
+                  onConfirm: () => Navigator.of(context).popUntil((route) => route.isFirst)
+              );
+
+            } else {
+              // 200이 아닌 다른 상태 코드 처리
+              throw Exception('로그인에 실패했습니다. 상태 코드: ${response.statusCode}, 메시지: ${response.body}');
+            }
+          } catch (e) {
+            // 네트워크 오류 또는 로직 처리 중 예외 발생 시
+            print("❌ 로그인 처리 중 오류 발생: $e");
+            // 사용자에게 오류 메시지 표시
+            // ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('로그인에 실패했습니다: $e')));
+          }
         } else {
-          throw Exception('로그인 콜백을 받았지만 토큰이 없습니다.');
+          throw Exception('로그인 콜백을 받았지만 인증 코드가 없습니다.');
         }
       }
 
-      else if (uri.path == '/simplejoin') {
+      else if (uri.host == 'simplejoin') {
         final email = uri.queryParameters['email'];
         final username = uri.queryParameters['username'];
 
