@@ -32,6 +32,7 @@
   "loginSuccess": "Login Success",
   "joinSuccess": "Sign Up Success",
   "loginFailed": "Login Failed",
+  "loginFailedMessage": "Invalid information, please re-enter.",
   "joinFailed": "Sign Up Failed",
   "loginNeed": "You need to log in.",
   "loginComment": "It is a service that you can use after login.",

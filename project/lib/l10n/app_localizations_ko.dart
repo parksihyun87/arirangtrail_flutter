@@ -86,6 +86,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get loginFailed => '로그인 실패';
 
   @override
+  String get loginFailedMessage => '잘못된 정보입니다. 다시 입력해주세요.';
+
+  @override
   String get joinFailed => '회원가입 실패';
 
   @override

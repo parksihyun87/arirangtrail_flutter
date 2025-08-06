@@ -86,6 +86,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get loginFailed => 'Login Failed';
 
   @override
+  String get loginFailedMessage => 'Invalid information, please re-enter.';
+
+  @override
   String get joinFailed => 'Sign Up Failed';
 
   @override
