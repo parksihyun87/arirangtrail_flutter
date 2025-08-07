@@ -1,10 +1,11 @@
-// ChatService.dart
 
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:web_socket_channel/web_socket_channel.dart';
-import './chat_model.dart'; // ChatMessage 모델 임포트
+import 'package:stomp_dart_client/stomp.dart';
+import 'package:stomp_dart_client/stomp_config.dart';
+import 'package:stomp_dart_client/stomp_frame.dart';
+import './chat_model.dart';
 
 class ChatService {
   final int roomId;
@@ -12,117 +13,107 @@ class ChatService {
   final String senderId;
   final String senderNickname;
 
-  WebSocketChannel? _channel; // 웹소켓 채널을 저장할 변수
-  StreamSubscription? _streamSubscription; // 메시지 수신을 위한 구독
+  // StompClient 인스턴스를 저장할 변수
+  StompClient? _stompClient;
+  // 구독 해지를 위한 콜백 함수를 저장
+  void Function()? _unsubscribeCallback;
 
   final _messageController = StreamController<ChatMessage>.broadcast();
   Stream<ChatMessage> get messageStream => _messageController.stream;
 
-  ChatService({required this.roomId, required this.jwtToken,required this.senderId, required this.senderNickname});
+  ChatService({
+    required this.roomId,
+    required this.jwtToken,
+    required this.senderId,
+    required this.senderNickname,
+  });
 
-  // 1. 연결 및 인증
   void connect() {
-    // 배포시
     final wsUrl = dotenv.env['PROD_WS_FLUTTER_URL'];
-    // 로컬시
-    // final wsUrl = dotenv.env['DEV_WS_FLUTTER_URL'];
-
     if (wsUrl == null) {
-      print("PROD_WS_FLUTTER_URL을 .env 파일에서 찾을 수 없습니다.");
+      print("DEV_WS_FLUTTER_URL을 .env 파일에서 찾을 수 없습니다.");
       return;
     }
 
-    final cleanToken = jwtToken.startsWith('Bearer ') ? jwtToken.substring(7) : jwtToken;
+    final pureToken = jwtToken.startsWith('Bearer ') ? jwtToken.substring(7) : jwtToken;
 
-    try {
-      _channel = WebSocketChannel.connect(Uri.parse(wsUrl));
-      print("✅ 웹소켓 채널 연결 시도...");
+    // ✨ StompClient 인스턴스 생성
+    _stompClient = StompClient(
+      config: StompConfig(
+        url: wsUrl,
+        onConnect: _onConnectCallback, // 연결 성공 시 호출될 함수
+        onWebSocketError: (dynamic error) => print("웹소켓 오류: $error"),
+        onStompError: (StompFrame frame) => print("STOMP 프로토콜 오류: ${frame.body}"),
+        onDisconnect: (StompFrame frame) => print("웹소켓 연결 끊어짐."),
 
-      // 연결이 성공하면 STOMP CONNECT 프레임을 보냅니다.
-      _sendConnectFrame();
+        // ✨✨✨ 가장 중요한 부분: CONNECT 프레임에 인증 헤더 추가 ✨✨✨
+        // 서버의 StompHandler가 이 헤더를 검사합니다.
+        stompConnectHeaders: {
+          'Authorization': 'Bearer $pureToken',
+        },
+        // 웹소켓 자체의 연결 헤더 (필요 시 사용)
+        webSocketConnectHeaders: {
+          'Authorization': 'Bearer $pureToken',
+        },
+      ),
+    );
 
-      // 서버로부터 오는 메시지를 수신 대기합니다.
-      _streamSubscription = _channel!.stream.listen(_onMessageReceived);
-
-    } catch (e) {
-      print("❌ 웹소켓 연결 에러: $e");
-    }
+    // 연결 활성화
+    print("✅ StompClient 활성화 시도...");
+    _stompClient!.activate();
   }
 
-  // 2. 메시지 수신 처리
-  void _onMessageReceived(dynamic message) {
-    print("서버로부터 메시지 수신: $message");
+  // 연결 성공 후 실행되는 콜백 함수
+  void _onConnectCallback(StompFrame frame) {
+    print("🎉 STOMP 연결 성공! 채팅방 구독을 시작합니다.");
 
-    // CONNECTED 프레임을 받으면, 채팅방을 구독합니다.
-    if (message.toString().startsWith('CONNECTED')) {
-      print("🎉 STOMP 연결 성공! 채팅방 구독을 시작합니다.");
-      _subscribeToChatRoom();
-    }
-    // MESSAGE 프레임을 받으면, 메시지를 파싱하여 스트림에 추가합니다.
-    else if (message.toString().startsWith('MESSAGE')) {
-      try {
-        // STOMP 프레임에서 JSON 본문만 추출
-        final bodyIndex = message.indexOf('\n\n');
-        if (bodyIndex != -1) {
-          final jsonBody = message.substring(bodyIndex).trim().replaceAll('\x00', '');
-          final chatMessage = ChatMessage.fromJson(json.decode(jsonBody));
-          _messageController.add(chatMessage);
+    // 채팅방 구독 시작
+    _unsubscribeCallback = _stompClient?.subscribe(
+      destination: '/sub/chat/room/$roomId',
+      callback: (frame) {
+        if (frame.body != null) {
+          try {
+            final chatMessage = ChatMessage.fromJson(json.decode(frame.body!));
+            _messageController.add(chatMessage);
+          } catch (e) {
+            print("메시지 파싱 에러: $e");
+          }
         }
-      } catch (e) {
-        print("메시지 파싱 에러: $e");
-      }
-    }
+      },
+    );
   }
 
-  // 3. 메시지 전송 (채팅 입력)
+  // 메시지 전송
   void sendMessage(String messageContent) {
-    if (_channel != null) {
-      final messagePayload = {
-        'type': 'TALK',
-        'roomId': roomId,
-        'sender': senderId,
-        'nickname': senderNickname,
-        'message': messageContent,
-      };
-
-      // STOMP SEND 프레임 구성
-      final sendFrame = 'SEND\n'
-          'destination:/api/pub/chat/message\n'
-          'content-type:application/json\n\n'
-          '${json.encode(messagePayload)}\x00';
-
-      _channel!.sink.add(sendFrame);
-      print("메시지 전송: $messageContent");
+    if (_stompClient == null || !_stompClient!.connected) {
+      print("❌ 메시지 전송 실패: STOMP 클라이언트가 연결되지 않았습니다.");
+      return;
     }
+
+    final messagePayload = {
+      'type': 'TALK',
+      'roomId': roomId,
+      'sender': senderId,
+      'nickname': senderNickname,
+      'message': messageContent,
+    };
+
+    // 서버의 @MessageMapping 경로와 일치해야 함 (/api/pub 접두사 포함)
+    _stompClient!.send(
+      destination: '/api/pub/chat/message',
+      body: json.encode(messagePayload),
+      headers: {'content-type': 'application/json'},
+    );
+    print("메시지 전송: $messageContent");
   }
 
-  // 4. 연결 해제
+  // 서비스 정리
   void dispose() {
-    if (_channel != null) {
-      // STOMP DISCONNECT 프레임 전송
-      _channel!.sink.add('DISCONNECT\n\n\x00');
-    }
-    _streamSubscription?.cancel();
+    // 구독 해지
+    _unsubscribeCallback?.call();
+    // 연결 비활성화
+    _stompClient?.deactivate();
     _messageController.close();
-    _channel?.sink.close();
     print("ChatService 정리 완료.");
-  }
-
-  // --- 내부 헬퍼 메소드들 ---
-  void _sendConnectFrame() {
-    final cleanToken = jwtToken.startsWith('Bearer ') ? jwtToken : 'Bearer $jwtToken';
-    final connectFrame = 'CONNECT\n'
-        'Authorization:$cleanToken\n'
-        'accept-version:1.0,1.1,2.0\n'
-        'heart-beat:10000,10000\n\n\x00';
-    _channel!.sink.add(connectFrame);
-  }
-
-  void _subscribeToChatRoom() {
-    final subscribeFrame = 'SUBSCRIBE\n'
-        'id:sub-0\n' // 구독 ID
-        'destination:/sub/chat/room/$roomId\n\n\x00';
-    _channel!.sink.add(subscribeFrame);
-    print("채팅방 구독 프레임 전송: /sub/chat/room/$roomId");
   }
 }

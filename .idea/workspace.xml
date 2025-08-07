@@ -5,18 +5,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="a5fbd55e-8660-481d-883c-3a2ea78cef04" name="Changes" comment="각종 디버깅중">
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Dart_SDK.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Dart_SDK.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/project/.env" beforeDir="false" afterPath="$PROJECT_DIR$/project/.env" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/project/lib/api_client.dart" beforeDir="false" afterPath="$PROJECT_DIR$/project/lib/api_client.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/lib/chat/chat_api_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/project/lib/chat/chat_api_service.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/project/lib/chat/chat_room_list_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/project/lib/chat/chat_room_list_screen.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/project/lib/chat/chat_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/project/lib/chat/chat_service.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/project/lib/chat/lobby_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/project/lib/chat/lobby_service.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/lib/main.dart" beforeDir="false" afterPath="$PROJECT_DIR$/project/lib/main.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/lib/provider/auth_provider.dart" beforeDir="false" afterPath="$PROJECT_DIR$/project/lib/provider/auth_provider.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/lib/user/join_page.dart" beforeDir="false" afterPath="$PROJECT_DIR$/project/lib/user/join_page.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/lib/user/login_page.dart" beforeDir="false" afterPath="$PROJECT_DIR$/project/lib/user/login_page.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/project/pubspec.lock" beforeDir="false" afterPath="$PROJECT_DIR$/project/pubspec.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/project/pubspec.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/project/pubspec.yaml" afterDir="false" />
     </list>
@@ -36,6 +30,11 @@
     </option>
   </component>
   <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="revert-to-003ac59" />
+      </map>
+    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="GitHubPullRequestSearchHistory">{
@@ -73,7 +72,7 @@
     "cidr.known.project.marker": "true",
     "com.google.services.firebase.aqiPopupShown": "true",
     "dart.analysis.tool.window.visible": "false",
-    "git-widget-placeholder": "main",
+    "git-widget-placeholder": "wip-temp-save",
     "io.flutter.reload.alreadyRun": "true",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "C:/Users/803-02/Desktop/flutter/bin/cache/dart-sdk",

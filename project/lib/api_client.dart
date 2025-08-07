@@ -6,6 +6,7 @@ class ApiClient {
   static ApiClient? _instance;
   late Dio _dio;
   final String _baseUrl = 'http://arirangtrail.duckdns.org/';
+  // final String _baseUrl = 'http://10.0.2.2:8080/';
 
   // AuthProvider 참조 (import 없이 dynamic으로 처리)
   dynamic _authProvider;
