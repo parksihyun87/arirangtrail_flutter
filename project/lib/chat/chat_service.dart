@@ -32,6 +32,8 @@ class ChatService {
       return;
     }
 
+    final cleanToken = jwtToken.startsWith('Bearer ') ? jwtToken.substring(7) : jwtToken;
+
     try {
       _channel = WebSocketChannel.connect(Uri.parse(wsUrl));
       print("✅ 웹소켓 채널 연결 시도...");

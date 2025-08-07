@@ -1,10 +1,11 @@
-import 'dart:convert';
+// LoginPage.dart (전체 리팩토링 완료)
+
+import 'package:dio/dio.dart'; // DioException을 사용하기 위해 임포트
 import 'package:flutter/material.dart';
 import 'package:project/provider/auth_provider.dart';
 import 'package:project/user/simple_join.dart';
 import 'package:provider/provider.dart';
-import '../api_client.dart';
-import '../provider/auth_provider.dart';
+import '../api_client.dart'; // 전역 apiClient 사용
 import 'join_page.dart';
 import '../l10n/app_localizations.dart';
 import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
@@ -28,7 +29,10 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
+  // --- 일반 로그인 메서드 ---
   Future<void> _performLogin() async {
+    // buildContext가 유효할 때만 실행되도록 체크
+    if (!mounted) return;
     final authProvider = context.read<AuthProvider>();
     final l10n = AppLocalizations.of(context)!;
     final username = _usernameController.text;
@@ -40,36 +44,37 @@ class _LoginPageState extends State<LoginPage> {
       return;
     }
     setState(() => _isLoading = true);
+
     try {
-      // 1. ApiClient를 사용하여 로그인 API 호출 (이 부분은 이전과 동일)
-      final response = await apiClient
-          .postForm('api/login', {'username': username, 'password': password});
+      // ApiClient에 정의된 postForm 메서드 사용
+      final response = await apiClient.postForm('api/login', {
+        'username': username,
+        'password': password,
+      });
 
       if (response.statusCode == 200) {
-        final responseData = jsonDecode(utf8.decode(response.bodyBytes));
-        final accessToken = response.headers['authorization'];
+        final responseData = response.data; // dio는 자동으로 json을 파싱
+        final accessToken = response.headers.value('authorization');
+        final setCookieHeader = response.headers.value('set-cookie');
 
-        // 2. Refresh Token 파싱
         String? refreshToken;
-        final setCookieHeader = response.headers['set-cookie'];
         if (setCookieHeader != null) {
           final cookie = setCookieHeader
               .split(';')
-              .firstWhere((c) => c.trim().startsWith('refresh='));
-          refreshToken = cookie.split('=').last;
+              .firstWhere((c) => c.trim().startsWith('refresh='), orElse: () => '');
+          if (cookie.isNotEmpty) {
+            refreshToken = cookie.split('=').last;
+          }
         }
 
         if (accessToken == null || refreshToken == null) {
           throw Exception('서버로부터 토큰 정보를 받지 못했습니다.');
         }
 
-        // ✨ 3. 서버가 보내준 expiresIn 값을 추출
         final int expiresIn = responseData['expiresIn'];
-
         final userProfile = UserProfile.fromJson(responseData);
 
         if (mounted) {
-          // ✨ 4. AuthProvider.login에 expiresIn 값을 추가로 전달
           await authProvider.login(
               userProfile, accessToken, refreshToken, expiresIn);
 
@@ -79,14 +84,19 @@ class _LoginPageState extends State<LoginPage> {
               onConfirm: () =>
                   Navigator.of(context).popUntil((route) => route.isFirst));
         }
-      } else {
-        final errorData = jsonDecode(utf8.decode(response.bodyBytes));
-        throw Exception(errorData['error'] ?? '알 수 없는 오류가 발생했습니다.');
       }
+      // dio는 2xx가 아닌 경우 예외를 발생시키므로 else 블록은 사실상 필요 없습니다.
+      // 예외 처리는 catch 블록에서 처리됩니다.
+    } on DioException catch (e) {
+      String errorMessage = l10n.loginFailedMessage;
+      // 서버가 보낸 에러 메시지가 있으면 그것을 사용
+      if (e.response?.data != null && e.response!.data is Map) {
+        errorMessage = e.response!.data['error'] ?? errorMessage;
+      }
+      _showResultDialog(title: l10n.loginFailed, content: errorMessage);
     } catch (e) {
-      _showResultDialog(
-          title: l10n.loginFailed,
-          content: l10n.loginFailedMessage);
+      // DioException이 아닌 다른 예외 처리
+      _showResultDialog(title: l10n.loginFailed, content: e.toString());
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);
@@ -94,9 +104,13 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
+  // --- OAuth 로그인 메서드 ---
   Future<void> _performOauthLogin(String provider) async {
+    if (!mounted) return;
+    final authProvider = context.read<AuthProvider>();
     final l10n = AppLocalizations.of(context)!;
     setState(() => _isLoading = true);
+
     try {
       final url = Uri.parse(
           'http://arirangtrail.duckdns.org/oauth2/authorization/$provider?state=client_type=app');
@@ -105,77 +119,55 @@ class _LoginPageState extends State<LoginPage> {
         callbackUrlScheme: "arirangtrail",
       );
       final uri = Uri.parse(result);
+
+      // [시나리오 1] 로그인/회원가입 콜백 성공
       if (uri.host == 'oauth-callback') {
-        final code = uri.queryParameters['code']; // 변수명을 token에서 code로 변경하여 명확화
-        if (code != null) {
-          print("로그인 콜백 수신! 인증 코드: $code");
-          try {
-            final response = await apiClient.post(
-              'api/app/login',
-              {'code': code},
-            );
+        final code = uri.queryParameters['code'];
+        if (code == null) throw Exception('로그인 콜백을 받았지만 인증 코드가 없습니다.');
 
-            // ✨ 서버로부터 200 OK 응답을 받았을 때 처리 로직
-            if (response.statusCode == 200) {
-              // 1. 응답 본문을 JSON 객체로 디코딩
-              final responseData = jsonDecode(utf8.decode(response.bodyBytes));
+        print("로그인 콜백 수신! 인증 코드: $code");
 
-              // 2. AuthProvider 인스턴스 가져오기
-              // BuildContext가 사용 가능한 위치여야 합니다.
-              // 사용 불가능한 경우, Provider를 다른 방식으로 가져와야 합니다.
-              final authProvider = Provider.of<AuthProvider>(context, listen: false);
+        // apiClient.post 호출 시 data: 파라미터 사용
+        final response = await apiClient.post(
+          'api/app/login',
+          data: {'code': code},
+        );
 
-              // 3. 응답 데이터에서 정보 추출
-              final userProfileData = responseData['userProfile'];
-              final accessToken = responseData['accessToken'];
-              final refreshToken = responseData['refreshToken'];
-              final expiresIn = responseData['expiresIn']; // 초 단위 만료 시간
+        if (response.statusCode == 200) {
+          final responseData = response.data;
 
-              // 4. 데이터 유효성 검사
-              if (userProfileData == null || accessToken == null || refreshToken == null || expiresIn == null) {
-                throw Exception('서버 응답에 필수 데이터가 누락되었습니다.');
-              }
+          final userProfileData = responseData['userProfile'];
+          final accessToken = responseData['accessToken'];
+          final refreshToken = responseData['refreshToken'];
+          final expiresIn = responseData['expiresIn'];
 
-              // 5. UserProfile 객체 생성
-              final userProfile = UserProfile.fromJson(userProfileData);
-
-              // 6. AuthProvider의 login 메서드 호출하여 상태 업데이트 및 저장
-              await authProvider.login(
-                userProfile,
-                accessToken,
-                refreshToken,
-                expiresIn,
-              );
-
-              print("✅ 로그인 성공 및 AuthProvider 상태 업데이트 완료!");
-              // (옵션) 로그인 성공 후 홈 화면 등 다른 화면으로 이동
-              _showResultDialog(
-                  title: l10n.loginSuccess,
-                  content: l10n.welcomeMessage(userProfile.nickname),
-                  onConfirm: () => Navigator.of(context).popUntil((route) => route.isFirst)
-              );
-
-            } else {
-              // 200이 아닌 다른 상태 코드 처리
-              throw Exception('로그인에 실패했습니다. 상태 코드: ${response.statusCode}, 메시지: ${response.body}');
-            }
-          } catch (e) {
-            // 네트워크 오류 또는 로직 처리 중 예외 발생 시
-            print("❌ 로그인 처리 중 오류 발생: $e");
-            // 사용자에게 오류 메시지 표시
-            // ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('로그인에 실패했습니다: $e')));
+          if (userProfileData == null || accessToken == null || refreshToken == null || expiresIn == null) {
+            throw Exception('서버 응답에 필수 데이터가 누락되었습니다.');
           }
-        } else {
-          throw Exception('로그인 콜백을 받았지만 인증 코드가 없습니다.');
+
+          final userProfile = UserProfile.fromJson(userProfileData);
+
+          await authProvider.login(
+            userProfile,
+            accessToken,
+            refreshToken,
+            expiresIn,
+          );
+
+          print("✅ 로그인 성공 및 AuthProvider 상태 업데이트 완료!");
+          _showResultDialog(
+              title: l10n.loginSuccess,
+              content: l10n.welcomeMessage(userProfile.nickname),
+              onConfirm: () => Navigator.of(context).popUntil((route) => route.isFirst)
+          );
         }
       }
-
+      // [시나리오 2] 간편 회원가입으로 이동
       else if (uri.host == 'simplejoin') {
         final email = uri.queryParameters['email'];
         final username = uri.queryParameters['username'];
 
-        print("신규 회원입니다. 회원가입 페이지로 이동합니다.");
-        print("이메일: $email, 이름: $username");
+        print("신규 회원입니다. 회원가입 페이지로 이동합니다. 이메일: $email, 이름: $username");
         if(email != null && username != null){
           Navigator.of(context).push(MaterialPageRoute(
             builder: (_) => SimpleJoin(email: email, username: username),
@@ -186,7 +178,16 @@ class _LoginPageState extends State<LoginPage> {
       else {
         throw Exception('알 수 없는 콜백 URL입니다: $result');
       }
+    } on DioException catch (e) {
+      // 서버에서 보낸 에러 메시지를 우선적으로 표시
+      _showResultDialog(
+          title: l10n.loginFailed,
+          content: e.response?.data?['error'] ?? l10n.loginFailedMessage);
     } catch (e) {
+      // 웹 인증 취소 등 기타 예외 처리
+      print("❌ 로그인 처리 중 오류 발생: $e");
+      // 사용자가 웹뷰를 닫는 등의 행동은 오류 메시지를 보여주지 않을 수 있습니다.
+      // 여기서는 일단 실패 메시지를 보여줍니다.
       _showResultDialog(
         title: l10n.loginFailed,
         content: l10n.loginFailedMessage,
@@ -196,27 +197,27 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  void _showResultDialog(
-      {required String title,
-      required String content,
-      VoidCallback? onConfirm}) {
+  // --- 결과 다이얼로그 ---
+  void _showResultDialog({required String title, required String content, VoidCallback? onConfirm}) {
+    if (!mounted) return;
     final l10n = AppLocalizations.of(context)!;
     showDialog(
         context: context,
         builder: (context) => AlertDialog(
-              title: Text(title),
-              content: Text(content),
-              actions: [
-                TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                      onConfirm?.call();
-                    },
-                    child: Text(l10n.confirm))
-              ],
-            ));
+          title: Text(title),
+          content: Text(content),
+          actions: [
+            TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  onConfirm?.call();
+                },
+                child: Text(l10n.confirm))
+          ],
+        ));
   }
 
+  // --- 위젯 빌드 ---
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -279,6 +280,7 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
+  // --- OAuth 버튼 빌더 ---
   Widget _buildOauthButton(String provider) {
     // 기준이 될 버튼의 크기를 상수로 정의합니다.
     const double buttonWidth = 230.0;
@@ -304,7 +306,7 @@ class _LoginPageState extends State<LoginPage> {
           ),
         );
       case 'naver':
-        // ClipRRect로 감싸서 둥근 모서리를 적용합니다.
+      // ClipRRect로 감싸서 둥근 모서리를 적용합니다.
         return ClipRRect(
           borderRadius: borderRadius,
           child: SizedBox(
@@ -321,7 +323,7 @@ class _LoginPageState extends State<LoginPage> {
           ),
         );
       case 'kakao':
-        // 카카오 버튼에도 동일하게 적용합니다.
+      // 카카오 버튼에도 동일하게 적용합니다.
         return ClipRRect(
           borderRadius: borderRadius,
           child: SizedBox(

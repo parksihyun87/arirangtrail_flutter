@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:dio/src/response.dart';
 import 'package:flutter/material.dart';
 import '../api_client.dart';
 import '../l10n/app_localizations.dart';
@@ -11,7 +12,7 @@ class JoinPage extends StatefulWidget {
 }
 
 class _JoinPageState extends State<JoinPage> {
-  final _apiClient = ApiClient();
+  // final _apiClient = ApiClient();
   final _formKey = GlobalKey<FormState>();
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -39,7 +40,7 @@ class _JoinPageState extends State<JoinPage> {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _isLoading = true);
     try {
-      final response = await _apiClient.post('api/join', {
+      final response = await apiClient.post('api/join', data: {
         'username': _usernameController.text,
         'password': _passwordController.text,
         'email': _emailController.text,
@@ -50,8 +51,8 @@ class _JoinPageState extends State<JoinPage> {
       });
       if (response.statusCode == 200 || response.statusCode == 201) {
         String successMessage = l10n.joinSuccess;
-        if (response.body.isNotEmpty) {
-          final responseData = jsonDecode(utf8.decode(response.bodyBytes));
+        if (response.data != null && response.data is Map<String, dynamic>) {
+          final responseData = response.data; // 바로 사용!
           successMessage = responseData['message'] ?? successMessage;
         }
         _showResultDialog(
@@ -59,9 +60,10 @@ class _JoinPageState extends State<JoinPage> {
             content: successMessage,
             onConfirm: () => Navigator.of(context).pop());
       } else {
+        // ✨ 에러 처리 부분도 동일하게 수정합니다.
         String errorMessage = '알 수 없는 서버 오류';
-        if (response.body.isNotEmpty) {
-          final errorData = jsonDecode(utf8.decode(response.bodyBytes));
+        if (response.data != null && response.data is Map<String, dynamic>) {
+          final errorData = response.data;
           errorMessage = errorData['message'] ?? errorMessage;
         }
         throw Exception(errorMessage);
@@ -202,4 +204,8 @@ class _JoinPageState extends State<JoinPage> {
         labelText: label,
         labelStyle: TextStyle(color: Colors.white.withOpacity(0.7)));
   }
+}
+
+extension on Response {
+  get body => null;
 }

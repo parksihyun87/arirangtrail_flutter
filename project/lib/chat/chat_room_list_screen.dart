@@ -53,7 +53,11 @@ class _ChatRoomListScreenState extends State<ChatRoomListScreen> {
   }
 
   // 데이터를 불러오는 로직
-  void _loadChatRooms() {
+  void _loadChatRooms() async {
+    //임시 비동기
+    // if (!mounted) return;
+    // await Future.delayed(const Duration(milliseconds: 500));
+    // 요기까지
     // ✨ Provider를 사용하여 AuthProvider에 접근합니다.
     // ✨ listen: false는 build 메서드 밖에서 상태를 읽을 때 불필요한 재빌드를 막는 최적화 옵션입니다.
     final authProvider = Provider.of<AuthProvider>(context, listen: false);

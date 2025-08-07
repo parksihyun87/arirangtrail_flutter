@@ -18,6 +18,8 @@ class LobbyService {
       return;
     }
 
+
+
     try {
       _channel = WebSocketChannel.connect(Uri.parse(wsUrl));
       print("✅ [LobbyService] 웹소켓 채널 연결 시도...");
