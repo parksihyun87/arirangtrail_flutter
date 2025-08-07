@@ -4,19 +4,15 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="a5fbd55e-8660-481d-883c-3a2ea78cef04" name="Changes" comment="웹소켓 리이슈 완료">
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Dart_SDK.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Dart_SDK.xml" afterDir="false" />
+    <list default="true" id="a5fbd55e-8660-481d-883c-3a2ea78cef04" name="Changes" comment="각종 디버깅중">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/android/app/src/main/AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/project/android/app/src/main/AndroidManifest.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/lib/user/login_page.dart" beforeDir="false" afterPath="$PROJECT_DIR$/project/lib/user/login_page.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/lib/l10n/app_en.arb" beforeDir="false" afterPath="$PROJECT_DIR$/project/lib/l10n/app_en.arb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/lib/l10n/app_ko.arb" beforeDir="false" afterPath="$PROJECT_DIR$/project/lib/l10n/app_ko.arb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/lib/l10n/app_localizations.dart" beforeDir="false" afterPath="$PROJECT_DIR$/project/lib/l10n/app_localizations.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/lib/l10n/app_localizations_en.dart" beforeDir="false" afterPath="$PROJECT_DIR$/project/lib/l10n/app_localizations_en.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/lib/l10n/app_localizations_ko.dart" beforeDir="false" afterPath="$PROJECT_DIR$/project/lib/l10n/app_localizations_ko.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/lib/navigation_drawer.dart" beforeDir="false" afterPath="$PROJECT_DIR$/project/lib/navigation_drawer.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/lib/user/join_page.dart" beforeDir="false" afterPath="$PROJECT_DIR$/project/lib/user/join_page.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/lib/user/login_page.dart" beforeDir="false" afterPath="$PROJECT_DIR$/project/lib/user/login_page.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/project/.env" beforeDir="false" afterPath="$PROJECT_DIR$/project/.env" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/project/lib/api_client.dart" beforeDir="false" afterPath="$PROJECT_DIR$/project/lib/api_client.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/project/lib/chat/chat_room_list_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/project/lib/chat/chat_room_list_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/project/lib/chat/chat_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/project/lib/chat/chat_service.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/project/lib/chat/lobby_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/project/lib/chat/lobby_service.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/project/pubspec.lock" beforeDir="false" afterPath="$PROJECT_DIR$/project/pubspec.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/project/pubspec.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/project/pubspec.yaml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -34,6 +30,11 @@
     </option>
   </component>
   <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="revert-to-003ac59" />
+      </map>
+    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="GitHubPullRequestSearchHistory">{
@@ -71,7 +72,7 @@
     "cidr.known.project.marker": "true",
     "com.google.services.firebase.aqiPopupShown": "true",
     "dart.analysis.tool.window.visible": "false",
-    "git-widget-placeholder": "dev__mingyu",
+    "git-widget-placeholder": "wip-temp-save",
     "io.flutter.reload.alreadyRun": "true",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "C:/Users/803-02/Desktop/flutter/bin/cache/dart-sdk",
@@ -148,6 +149,7 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="리이슈전 확인" />
     <MESSAGE value="웹소켓 리이슈 완료" />
-    <option name="LAST_COMMIT_MESSAGE" value="웹소켓 리이슈 완료" />
+    <MESSAGE value="각종 디버깅중" />
+    <option name="LAST_COMMIT_MESSAGE" value="각종 디버깅중" />
   </component>
 </project>

@@ -20,7 +20,7 @@ class ChatRoomListScreen extends StatefulWidget {
 
 class _ChatRoomListScreenState extends State<ChatRoomListScreen> {
   // 채팅방 목록 데이터를 저장할 Future 상태 변수
-  late Future<List<ChatRoom>> _chatRoomsFuture;
+  Future<List<ChatRoom>>? _chatRoomsFuture;
   LobbyService? _lobbyService;
 
   // initState: 위젯이 처음 생성될 때 딱 한 번 호출
@@ -35,14 +35,19 @@ class _ChatRoomListScreenState extends State<ChatRoomListScreen> {
 
   void _initializeLobbyService() {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    if (authProvider.token != null) {
-      _lobbyService = LobbyService(onLobbyUpdate: () {
-        // ✨ 서버에서 신호가 오면, 목록을 다시 불러옴
-        if (mounted) {
-          _loadChatRooms();
-        }
-      });
-      _lobbyService!.connectAndSubscribe(authProvider.token!);
+    final token = authProvider.token; // AuthProvider에서 토큰 가져오기
+
+    if (token != null) {
+      // ✨ 수정된 생성자 사용
+      _lobbyService = LobbyService(
+        jwtToken: token, // ✨ 토큰 전달
+        onLobbyUpdate: () {
+          if (mounted) {
+            _loadChatRooms();
+          }
+        },
+      );
+      _lobbyService!.connectAndSubscribe(); // ✨ 파라미터 없이 호출
     }
   }
 
@@ -53,7 +58,11 @@ class _ChatRoomListScreenState extends State<ChatRoomListScreen> {
   }
 
   // 데이터를 불러오는 로직
-  void _loadChatRooms() {
+  void _loadChatRooms() async {
+    //임시 비동기
+    // if (!mounted) return;
+    // await Future.delayed(const Duration(milliseconds: 500));
+    // 요기까지
     // ✨ Provider를 사용하여 AuthProvider에 접근합니다.
     // ✨ listen: false는 build 메서드 밖에서 상태를 읽을 때 불필요한 재빌드를 막는 최적화 옵션입니다.
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
@@ -88,7 +97,10 @@ class _ChatRoomListScreenState extends State<ChatRoomListScreen> {
           ),
         ],
       ),
-      body: FutureBuilder<List<ChatRoom>>(
+      body: _chatRoomsFuture == null
+        ? const Center(child: CircularProgressIndicator()) // 초기 로딩 상태
+        :
+        FutureBuilder<List<ChatRoom>>(
         future: _chatRoomsFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
